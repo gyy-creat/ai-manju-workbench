@@ -1,0 +1,39 @@
+# 依赖与构建产物
+node_modules/
+dist/
+.tmp/
+*.log
+
+# 运行期数据：本地台账、上传素材、渲染成品、导出成品
+# 只保留目录占位，真实内容一律不进库（含用户剧本与图片）
+data/
+!data/.gitkeep
+uploads/
+renders/
+exports/
+skills/
+
+# 本机配置：模型 key、数据目录、ComfyUI 地址，绝不进库
+settings.json
+data/ai-config.json
+data/comfy.json
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Electron 打包产物
+release/
+*.exe
+*.msi
+
+# 外部 UI 参考长图（站酷《UI 界面优化改版 35 个小妙招》，版权归原作者，不随仓库分发）
+docs/ui-ref/
+
+# 发布产物：体积大，一律走 GitHub Releases（不塞进 git 历史）
+*.zip
+*.7z
+*.tar.gz
+release/

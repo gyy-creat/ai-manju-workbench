@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "title": "退婚那天，我亮了榫",
+    "platform": "douyin",
+    "style": "guoman-houtu",
+    "logline": "被柳家退婚、被当众烧掉父亲遗物的榫卯传人沈砚，用一册抵押账本，在一个午时之内把整座柳家祖宅收进自己那间破工坊。",
+    "audience": "P3 小镇青年 · E2 憋屈释放 · T4 深夜刷屏",
+    "tags": "都市, 复仇, 打脸, 匠人, 逆袭",
+    "createdAt": "2026-11-03T10:00:00.000Z",
+    "updatedAt": "2026-11-03T11:20:00.000Z"
+  },
+  "topics": [
+    {
+      "id": "tp_1",
+      "title": "退婚那天，我亮了榫",
+      "genre": "都市复仇 / 匠人逆袭",
+      "audience": "P3 小镇青年 · E2 憋屈释放 · T4 深夜",
+      "logline": "被柳家退婚、被当众烧掉父亲遗物的榫卯传人沈砚，用一册抵押账本，在一个午时之内把整座柳家祖宅收进自己那间破工坊。",
+      "memory": "他每念一页账，对面就塌一间房",
+      "benchmark": "抖音《赘婿归来》系列，首集完播 41%，靠前 5 秒退婚打脸起量",
+      "diff": "把「打脸」换成「念账」：不靠武力，一页账本念塌一间祖宅，视觉化兑现；匠人身份给出可拍摄的实物符号（榫、鲁班尺、匾额）",
+      "risk": "祖宅抵押、账本念账属虚构设定，需字幕标注「剧情演绎」；避免真实地名与真实老字号招牌"
+    },
+    {
+      "id": "tp_2",
+      "title": "我爹的棺材铺，只收活人的钱",
+      "genre": "民俗惊悚 / 都市怪谈",
+      "audience": "P2 男性向 · E3 猎奇 · T1 通勤",
+      "logline": "继承棺材铺的哑巴少年发现，父亲留下的账本上记的全是还没死的人，而第一个名字是他自己。",
+      "memory": "账本上每划掉一个人，街上就少一盏灯",
+      "benchmark": "快手《纸人回魂》系列，恐怖赛道首集 3 秒钩子为「纸人睁眼」",
+      "diff": "把恐怖点从「鬼出现」改成「名字被提前写进账本」，压迫感来自宿命而非 jump scare，适合动态漫低成本呈现",
+      "risk": "殡葬题材需规避真实殡仪流程；不做血腥特写；标注虚构"
+    }
+  ],
+  "characters": [
+    {
+      "id": "ch_shen",
+      "name": "沈砚",
+      "role": "主角",
+      "age": "27",
+      "look": "清瘦、肩背挺直，旧工装外套，小臂有木屑与浅疤",
+      "outfit": "深灰旧工装 + 洗白的黑 T，右手腕缠一圈磨旧的皮尺",
+      "anchor": "27-year-old Chinese man, lean build, sharp jaw, tired but steady eyes, short messy black hair, faded dark grey workwear jacket, scarred forearms, wooden ruler wrapped on right wrist",
+      "face": "窄长脸、眉骨重、眼窝略深、唇薄，左眉尾有一道旧疤",
+      "hair": "黑色短发，略乱，额前一缕自然垂下",
+      "prop": "磨旧的皮尺 + 一册线装账本",
+      "seed": "731204",
+      "refImage": "assets/ref/shen_ref_v01.png",
+      "voice": "青年男声·低沉",
+      "notes": "情绪不外放，靠眼神与手部动作演；说狠话时语速反而更慢"
+    },
+    {
+      "id": "ch_liu",
+      "name": "柳素心",
+      "role": "对手",
+      "age": "25",
+      "look": "妆容精致、身形纤细，米白高领，长外套，站姿带距离感",
+      "outfit": "米白高领毛衣 + 驼色长外套，耳坠一颗小珍珠",
+      "anchor": "25-year-old Chinese woman, slim, elegant makeup, sharp cold eyes, long black hair in a low bun, cream turtleneck, camel long coat, small pearl earrings",
+      "face": "鹅蛋脸、眉形锋利、下眼睑妆容偏冷、嘴角习惯性下压",
+      "hair": "黑色长发低盘，鬓角留两缕",
+      "prop": "一只装着退婚书的牛皮纸信封",
+      "seed": "402871",
+      "refImage": "assets/ref/liu_ref_v01.png",
+      "voice": "清冷女声·御姐",
+      "notes": "台词短、断句狠；怕脏，进工坊会下意识看鞋底"
+    },
+    {
+      "id": "ch_zhou",
+      "name": "周伯",
+      "role": "助攻",
+      "age": "62",
+      "look": "精瘦、背微驼、粗布褂子，手上有厚茧与老木刺",
+      "outfit": "深蓝粗布褂 + 布鞋，腰间挂一把小刨",
+      "anchor": "62-year-old Chinese craftsman, thin and slightly stooped, weathered face, white short beard, deep blue coarse cloth jacket, calloused hands, small woodworking plane at waist",
+      "face": "方脸、皱纹深、眼白偏黄、嘴角有旧伤疤",
+      "hair": "花白短发，眉毛粗白",
+      "prop": "一把老刨子 + 一串工坊钥匙",
+      "seed": "118802",
+      "refImage": "assets/ref/zhou_ref_v01.png",
+      "voice": "老年男声·沙哑",
+      "notes": "说方言尾音；代表「老街的手艺人群像」，出镜即群众背书"
+    }
+  ],
+  "episodes": [
+    {
+      "id": "ep_1",
+      "no": 1,
+      "title": "第1集 · 退婚书贴上门的第三年",
+      "hook": "三年退婚书还钉在门上那晚，沈砚把柳家祖宅的抵押契摆上了工坊的桌",
+      "hookType": "冲突开场",
+      "summary": "柳素心带人来沈家老宅逼签退婚书、烧掉沈父遗物；沈砚认药钱不认退婚，反手约她午时到老街工坊。工坊里十二个老匠人站出来，账本第一页念出柳家祖宅抵押，柳家当场失态。结尾沈砚揭下匾额红布，宣布明天午时开市。",
+      "cliffhangers": [
+        "父亲留下的三样东西，沈砚只亮了一本账",
+        "柳家断掉的药钱，沈砚母亲的病还剩几天"
+      ],
+      "beats": [
+        { "id": "bt_1", "t": "开局钩子", "text": "退婚书还钉在门上，柳素心带人进门，直接给两个选择：签，或者她娘断药。" },
+        { "id": "bt_2", "t": "冲突升级", "text": "柳家当众烧掉沈父留下的木样，沈砚只捡回一块榫，反手约午时工坊见。" },
+        { "id": "bt_3", "t": "反转铺垫", "text": "工坊里十二个老匠人从暗处站出来，沈砚亮出账本——抵押契是他抄的。" },
+        { "id": "bt_4", "t": "高潮打脸", "text": "第一页念出柳家祖宅抵押一千二百万，柳素心动摇，老匠人齐跪，她退了半步。" },
+        { "id": "bt_5", "t": "结尾钩子", "text": "匾额红布被揭下，沈砚宣布明天午时开市，柳素心放话要断他娘的药钱。" }
+      ],
+      "shots": [
+        { "id": "sh_1", "no": 1, "size": "大特写", "angle": "平视", "move": "固定", "scene": "旧宅堂屋", "desc": "门板上钉着泛黄的退婚书，雨顺着纸角往下淌，一只手伸进来按住它", "chars": "沈砚", "props": "退婚书", "speaker": "沈砚", "dialogue": "三年了，你们退婚的帖子还贴在门上。", "vo": "沈砚（青年男声·低沉）", "emotion": "压抑", "intensity": 4, "action": "手指按住湿透的退婚书", "dur": 2.8 },
+        { "id": "sh_2", "no": 2, "size": "中景", "angle": "斜角", "move": "推", "scene": "旧宅堂屋", "desc": "柳素心踏进门，鞋底在青砖上蹭了一下，牛皮纸信封放到桌上", "chars": "柳素心", "props": "牛皮纸信封", "speaker": "柳素心", "dialogue": "沈砚，签了这份退婚书，你娘的药钱我出。", "vo": "柳素心（清冷女声·御姐）", "emotion": "嘲讽", "intensity": 5, "action": "信封推到桌子中央", "dur": 3.0 },
+        { "id": "sh_3", "no": 3, "size": "近景", "angle": "过肩", "move": "固定", "scene": "旧宅堂屋", "desc": "越过柳素心肩头，沈砚没看信封，只看她", "chars": "沈砚,柳素心", "props": "信封", "speaker": "沈砚", "dialogue": "药钱我认，退婚书，你拿回去。", "vo": "沈砚（青年男声·低沉）", "emotion": "平静", "intensity": 4, "action": "把信封推回去", "dur": 2.2 },
+        { "id": "sh_4", "no": 4, "size": "全景", "angle": "俯视", "move": "移", "scene": "旧宅院中", "desc": "堂屋里一桌两人，门外站着她带来的四个人，雨幕把院子压得很低", "chars": "", "props": "", "speaker": "", "dialogue": "", "vo": "雨声 + 低频弦乐", "emotion": "紧张", "intensity": 3, "action": "镜头横移过门槛", "dur": 2.2 },
+        { "id": "sh_5", "no": 5, "size": "特写", "angle": "平视", "move": "固定", "scene": "旧宅堂屋", "desc": "沈砚从怀里取出一块榫头，木头断面上的年轮密得反常", "chars": "沈砚", "props": "榫头", "speaker": "沈砚", "dialogue": "你知道这块榫，值多少钱吗？", "vo": "沈砚（青年男声·低沉）", "emotion": "决绝", "intensity": 4, "action": "把榫头立在桌面", "dur": 2.2 },
+        { "id": "sh_6", "no": 6, "size": "中景", "angle": "平视", "move": "手持", "scene": "旧宅堂屋", "desc": "柳素心笑出声，抬手把榫头扫到地上", "chars": "柳素心", "props": "榫头", "speaker": "柳素心", "dialogue": "一块烂木头，也配在我柳家提价？", "vo": "柳素心（清冷女声·御姐）", "emotion": "嘲讽", "intensity": 5, "action": "抬手扫落榫头", "dur": 2.6 },
+        { "id": "sh_7", "no": 7, "size": "近景", "angle": "仰视", "move": "固定", "scene": "旧宅堂屋", "desc": "沈砚弯腰捡起榫头，抬眼时眼里没火了", "chars": "沈砚", "props": "榫头", "speaker": "沈砚", "dialogue": "配不配，明天午时，老街工坊见。", "vo": "沈砚（青年男声·低沉）", "emotion": "决绝", "intensity": 5, "action": "捡起榫头，慢慢站直", "dur": 2.6 },
+        { "id": "sh_8", "no": 8, "size": "大远景", "angle": "俯视", "move": "降", "scene": "老街外景", "desc": "雨里的老街，柳素心的车队碾过青石板离开，只剩堂屋一盏灯", "chars": "", "props": "", "speaker": "", "dialogue": "", "vo": "雨声渐弱 + 车轮碾水", "emotion": "压抑", "intensity": 3, "action": "俯拍下降至屋檐", "dur": 2.4 },
+        { "id": "sh_9", "no": 9, "size": "大远景", "angle": "仰视", "move": "升", "scene": "老街工坊", "desc": "工坊木门被从里推开，正午的光打进满是木屑的暗屋", "chars": "", "props": "木门", "speaker": "", "dialogue": "", "vo": "木轴吱呀 + 低频鼓点起", "emotion": "紧张", "intensity": 3, "action": "门被推开，光柱扫进来", "dur": 2.2 },
+        { "id": "sh_10", "no": 10, "size": "中景", "angle": "平视", "move": "跟", "scene": "老街工坊", "desc": "沈砚走进工坊，手一路拂过墙上的老工具", "chars": "沈砚", "props": "刨子,凿子", "speaker": "沈砚", "dialogue": "这门手艺，我爹留了三样东西。", "vo": "沈砚（青年男声·低沉）", "emotion": "平静", "intensity": 4, "action": "手拂过工具墙", "dur": 2.4 },
+        { "id": "sh_11", "no": 11, "size": "特写", "angle": "平视", "move": "固定", "scene": "老街工坊", "desc": "柳素心跟进工坊，抬手掩了下鼻子，鞋尖避着地上的木屑", "chars": "柳素心", "props": "", "speaker": "柳素心", "dialogue": "你爹死了十年，谁还记得他？", "vo": "柳素心（清冷女声·御姐）", "emotion": "嘲讽", "intensity": 5, "action": "抬手掩鼻", "dur": 2.2 },
+        { "id": "sh_12", "no": 12, "size": "近景", "angle": "主观", "move": "固定", "scene": "老街工坊", "desc": "沈砚的主观镜头，视线越过她，落在工坊深处的暗影上", "chars": "沈砚", "props": "", "speaker": "沈砚", "dialogue": "记得的人，都在等今天。", "vo": "沈砚（青年男声·低沉）", "emotion": "决绝", "intensity": 5, "action": "视线转向暗处", "dur": 1.8 },
+        { "id": "sh_13", "no": 13, "size": "全景", "angle": "平视", "move": "环绕", "scene": "老街工坊", "desc": "暗处十二个老匠人一个接一个站出来，周伯在最前面", "chars": "周伯", "props": "刨子,鲁班尺", "speaker": "", "dialogue": "", "vo": "脚步 + 枚点鼓", "emotion": "反转震撼", "intensity": 4, "action": "老匠人依次上前一步", "dur": 2.6 },
+        { "id": "sh_14", "no": 14, "size": "中景", "angle": "过肩", "move": "固定", "scene": "老街工坊", "desc": "越过周伯的肩，沈砚把一册线装账本放到工作台上", "chars": "沈砚,周伯", "props": "账本", "speaker": "沈砚", "dialogue": "柳家欠的一千三百万，今天连本带利。", "vo": "沈砚（青年男声·低沉）", "emotion": "爽", "intensity": 5, "action": "账本拍在台面上", "dur": 3.0 },
+        { "id": "sh_15", "no": 15, "size": "特写", "angle": "斜角", "move": "推", "scene": "老街工坊", "desc": "柳素心脸上第一次没有笑，指尖扣紧了信封", "chars": "柳素心", "props": "信封", "speaker": "柳素心", "dialogue": "账本是我抄的，你敢当众念？", "vo": "柳素心（清冷女声·御姐）", "emotion": "恐惧", "intensity": 4, "action": "指尖扣紧信封", "dur": 2.4 },
+        { "id": "sh_16", "no": 16, "size": "近景", "angle": "平视", "move": "固定", "scene": "老街工坊", "desc": "沈砚翻开账本第一页，纸边脆得掉渣", "chars": "沈砚", "props": "账本", "speaker": "沈砚", "dialogue": "念，从第一页开始念。", "vo": "沈砚（青年男声·低沉）", "emotion": "爽", "intensity": 4, "action": "翻开账本第一页", "dur": 1.8 },
+        { "id": "sh_17", "no": 17, "size": "大特写", "angle": "平视", "move": "固定", "scene": "老街工坊", "desc": "账页上朱砂写的字，被镜头一寸寸推近", "chars": "沈砚", "props": "账本", "speaker": "沈砚", "dialogue": "第一笔，柳家祖宅抵押，一千二百万。", "vo": "沈砚（青年男声·低沉）", "emotion": "反转震撼", "intensity": 5, "action": "指尖点在账页字上", "dur": 2.8 },
+        { "id": "sh_18", "no": 18, "size": "全景", "angle": "俯视", "move": "移", "scene": "老街工坊", "desc": "老匠人齐刷刷跪下，柳素心往后退了半步，脚跟撞到门槛", "chars": "周伯,柳素心", "props": "", "speaker": "", "dialogue": "", "vo": "膝盖落地 + 闷鼓", "emotion": "反转震撼", "intensity": 5, "action": "老匠人跪下，她退半步", "dur": 2.4 },
+        { "id": "sh_19", "no": 19, "size": "中景", "angle": "平视", "move": "跟", "scene": "工坊门外", "desc": "沈砚走到门外，雨已经停了，巷子里挤满看热闹的人", "chars": "沈砚", "props": "账本", "speaker": "沈砚", "dialogue": "你们都听清楚了？", "vo": "沈砚（青年男声·低沉）", "emotion": "爽", "intensity": 4, "action": "走到门槛外站定", "dur": 1.6 },
+        { "id": "sh_20", "no": 20, "size": "近景", "angle": "过肩", "move": "固定", "scene": "工坊门外", "desc": "柳素心追到门口，声音压得很低，只有两人能听见", "chars": "柳素心", "props": "信封", "speaker": "柳素心", "dialogue": "沈砚，你毁了柳家，也别想活。", "vo": "柳素心（清冷女声·御姐）", "emotion": "愤怒", "intensity": 5, "action": "抓住门框压低声音", "dur": 2.6 },
+        { "id": "sh_21", "no": 21, "size": "特写", "angle": "仰视", "move": "固定", "scene": "工坊门外", "desc": "沈砚低头看她，眼神平静得像在说别人的事", "chars": "沈砚", "props": "", "speaker": "沈砚", "dialogue": "我早就不想活了，是你的账让我活到今天。", "vo": "沈砚（青年男声·低沉）", "emotion": "决绝", "intensity": 5, "action": "俯身与她平视", "dur": 3.2 },
+        { "id": "sh_22", "no": 22, "size": "大远景", "angle": "平视", "move": "升", "scene": "工坊门外", "desc": "瓦檐上的水一滴一滴落下，工坊匾额上的红布被风吹得起角", "chars": "", "props": "匾额", "speaker": "", "dialogue": "", "vo": "滴水 + 弦乐上推", "emotion": "紧张", "intensity": 4, "action": "镜头升起，红布翻角", "dur": 2.8 },
+        { "id": "sh_23", "no": 23, "size": "中景", "angle": "斜角", "move": "推", "scene": "工坊门外", "desc": "沈砚伸手把匾额上的红布一把揭下来", "chars": "沈砚", "props": "匾额,红布", "speaker": "沈砚", "dialogue": "从今天起，这间工坊姓沈。", "vo": "沈砚（青年男声·低沉）", "emotion": "爽", "intensity": 5, "action": "一把揭下红布", "dur": 2.4 },
+        { "id": "sh_24", "no": 24, "size": "特写", "angle": "平视", "move": "固定", "scene": "工坊门外", "desc": "柳素心盯着匾额，忽然笑了一下", "chars": "柳素心", "props": "", "speaker": "柳素心", "dialogue": "你娘的药钱，柳家断了。", "vo": "柳素心（清冷女声·御姐）", "emotion": "嘲讽", "intensity": 4, "action": "抬眼看匾额后冷笑", "dur": 2.2 },
+        { "id": "sh_25", "no": 25, "size": "近景", "angle": "仰视", "move": "固定", "scene": "工坊门外", "desc": "沈砚把账本举起来，巷子里所有人的脸都在光里", "chars": "沈砚", "props": "账本", "speaker": "沈砚", "dialogue": "那就让全城人看看，谁先断。", "vo": "沈砚（青年男声·低沉）", "emotion": "爽", "intensity": 5, "action": "举起账本朝天", "dur": 2.4 },
+        { "id": "sh_26", "no": 26, "size": "大特写", "angle": "平视", "move": "固定", "scene": "工坊门外", "desc": "沈砚的手把一枚新刻的木牌挂上门框，木牌上只有一个字", "chars": "沈砚", "props": "木牌", "speaker": "沈砚", "dialogue": "明天午时，开市，都来看。", "vo": "沈砚（青年男声·低沉）", "emotion": "决绝", "intensity": 5, "action": "把木牌挂上门框", "dur": 1.8 }
+      ]
+    }
+  ],
+  "assets": [
+    { "id": "as_1", "ep": 1, "shot": 1, "status": "已有", "path": "assets/S01/S01E01_SH01_v01.png", "note": "开场特写，v02 待补雨丝层" },
+    { "id": "as_2", "ep": 1, "shot": 2, "status": "已有", "path": "assets/S01/S01E01_SH02_v01.png", "note": "" },
+    { "id": "as_3", "ep": 1, "shot": 5, "status": "返工", "path": "assets/S01/S01E01_SH05_v02.png", "note": "榫头年轮被生图糊掉，换参考图重出" },
+    { "id": "as_4", "ep": 1, "shot": 13, "status": "缺失", "path": "", "note": "十二人群像，需先出周伯单卡再拼" }
+  ]
+}

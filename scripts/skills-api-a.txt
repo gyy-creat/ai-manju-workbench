@@ -1,0 +1,197 @@
+  // ---------- Skill 市场：从 GitHub 拉 AI 漫剧相关开源 skill，按 star / 下载量排行 ----------
+  const skillsFile = path.join(dataDir, 'skills.json')
+  const skillsDir = path.join(rootDir, 'skills')
+  const GH_API = 'https://api.github.com'
+  const SKILL_CACHE_MS = 24 * 3600 * 1000
+  // 这几组查询合起来覆盖中英文的漫剧 / 短剧 / 分镜 skill 生态
+  const SKILL_QUERIES = [
+    '漫剧',
+    '短剧 skill',
+    'comic drama skill',
+    'manju skill',
+    'ai comic storyboard',
+    '分镜 skill',
+    'novel to comic',
+  ]
+  // 搜索结果里的噪音（B 站客户端、远程管理工具之类）靠这个过滤掉
+  const SKILL_KEEP = /漫剧|短剧|分镜|漫画|动漫|comic|drama|storyboard|manga|anime|skill|提示词|剧本|manju/i
+
+  async function ghGet(p, { timeout = 15000 } = {}) {
+    const headers = {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'ai-manju-workbench',
+    }
+    if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
+    const ctl = new AbortController()
+    const timer = setTimeout(() => ctl.abort(), timeout)
+    try {
+      const r = await fetch(`${GH_API}${p}`, { headers, signal: ctl.signal })
+      const j = await r.json().catch(() => null)
+      return { status: r.status, j, headers: r.headers }
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+
+  function skillIdOf(fullName) {
+    return String(fullName || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, '__')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 80)
+  }
+
+  function normalizeSkillRepo(it) {
+    const fullName = String(it.full_name || '')
+    if (!fullName.includes('/')) return null
+    return {
+      id: skillIdOf(fullName),
+      fullName,
+      owner: String(it.owner?.login || fullName.split('/')[0]),
+      name: String(it.name || fullName.split('/')[1] || ''),
+      desc: String(it.description || '').slice(0, 220),
+      url: String(it.html_url || ''),
+      stars: Number(it.stargazers_count) || 0,
+      forks: Number(it.forks_count) || 0,
+      issues: Number(it.open_issues_count) || 0,
+      lang: String(it.language || ''),
+      license: String(it.license?.spdx_id || ''),
+      topics: Array.isArray(it.topics) ? it.topics.slice(0, 6) : [],
+      sizeKb: Number(it.size) || 0,
+      pushedAt: String(it.pushed_at || ''),
+      createdAt: String(it.created_at || ''),
+      defaultBranch: String(it.default_branch || 'main'),
+      downloads: 0,
+    }
+  }
+
+  // 取 releases 里的资产下载总数；拿不到就是 0（GitHub 本身没有仓库级下载计数）
+  async function fetchDownloads(fullName) {
+    const r = await ghGet(`/repos/${fullName}/releases?per_page=10`)
+    if (r.status !== 200 || !Array.isArray(r.j)) return 0
+    let n = 0
+    for (const rel of r.j) for (const a of rel.assets || []) n += Number(a.download_count) || 0
+    return n
+  }
+
+  async function loadSkills() {
+    const cur = await readJson(skillsFile, null)
+    const base = { version: 1, fetchedAt: '', items: [], installed: {}, starFallback: true }
+    const sm = cur && typeof cur === 'object' ? { ...base, ...cur } : base
+    if (!sm.installed || typeof sm.installed !== 'object') sm.installed = {}
+    if (!Array.isArray(sm.items)) sm.items = []
+    return sm
+  }
+
+  async function saveSkills(sm) {
+    await writeJson(skillsFile, { version: 1, fetchedAt: sm.fetchedAt, items: sm.items, installed: sm.installed })
+  }
+
+  async function refreshSkills() {
+    const bucket = new Map()
+    let okCount = 0
+    let lastErr = ''
+    for (const q of SKILL_QUERIES) {
+      const r = await ghGet(`/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=15`)
+      if (r.status !== 200) {
+        lastErr = r.j?.message || `HTTP ${r.status}`
+        continue
+      }
+      okCount++
+      for (const it of r.j.items || []) {
+        const sk = normalizeSkillRepo(it)
+        if (!sk) continue
+        if (!SKILL_KEEP.test(`${sk.name} ${sk.desc} ${sk.topics.join(' ')}`)) continue
+        if (!bucket.has(sk.fullName)) bucket.set(sk.fullName, sk)
+      }
+    }
+    if (!okCount) throw new Error(lastErr || 'GitHub 搜索失败')
+    const items = [...bucket.values()].sort((a, b) => b.stars - a.stars).slice(0, 60)
+    return items
+  }
+
+  async function pickSkillFiles(fullName, branch) {
+    // 根目录优先找 SKILL.md，其次各种 README
+    const r = await ghGet(`/repos/${fullName}/contents/?ref=${encodeURIComponent(branch || 'main')}`)
+    if (r.status !== 200 || !Array.isArray(r.j)) return []
+    const names = r.j.filter((x) => x.type === 'file').map((x) => x.name)
+    const order = ['SKILL.md', 'skill.md', 'README.zh-CN.md', 'README.zh.md', 'README.md', 'readme.md']
+    const picked = order.filter((n) => names.includes(n))
+    return picked.slice(0, 3)
+  }
+
+  async function downloadSkill(fullName, item) {
+    const safeId = skillIdOf(fullName)
+    if (!safeId) throw new Error('仓库名不合法')
+    const dir = path.join(skillsDir, safeId)
+    await fs.mkdir(dir, { recursive: true })
+
+    // 小仓库整包下载（zip → tar 解压），大仓库只取说明文档，避免拖几十 MB
+    const branch = item?.defaultBranch || 'main'
+    const sizeKb = Number(item?.sizeKb) || 0
+    let mode = 'docs'
+    const files = []
+    if (sizeKb > 0 && sizeKb <= 8000) {
+      const zipUrl = `https://codeload.github.com/${fullName}/zip/refs/heads/${encodeURIComponent(branch)}`
+      const tmpZip = path.join(dir, '_repo.zip')
+      try {
+        const ctl = new AbortController()
+        const timer = setTimeout(() => ctl.abort(), 60000)
+        const r = await fetch(zipUrl, { signal: ctl.signal })
+        clearTimeout(timer)
+        if (r.ok) {
+          const buf = Buffer.from(await r.arrayBuffer())
+          await fs.writeFile(tmpZip, buf)
+          await pexec('tar', ['-xf', tmpZip, '-C', dir], { timeout: 60000, windowsHide: true })
+          // 解出来是 {repo}-{branch}/ 一层目录，把里面的东西提上来
+          const entries = await fs.readdir(dir, { withFileTypes: true })
+          const top = entries.find((e) => e.isDirectory() && e.name !== '.' && !e.name.startsWith('_'))
+          if (top) {
+            const inner = path.join(dir, top.name)
+            for (const e of await fs.readdir(inner)) {
+              await fs.rename(path.join(inner, e), path.join(dir, e))
+            }
+            await fs.rm(inner, { recursive: true, force: true })
+          }
+          mode = 'repo'
+        }
+      } catch {
+        /* 整包失败就退回只取文档 */
+      } finally {
+        await fs.rm(tmpZip, { force: true })
+      }
+    }
+    if (mode === 'docs') {
+      const picked = await pickSkillFiles(fullName, branch)
+      if (!picked.length) throw new Error('这个仓库根目录没有 SKILL.md 或 README.md')
+      for (const n of picked) {
+        const r = await ghGet(`/repos/${fullName}/contents/${encodeURIComponent(n)}?ref=${encodeURIComponent(branch)}`)
+        if (r.status !== 200 || !r.j?.content) continue
+        const text = Buffer.from(String(r.j.content), 'base64').toString('utf8')
+        await fs.writeFile(path.join(dir, n), text)
+        files.push(n)
+      }
+      if (!files.length) throw new Error('说明文档拉取失败')
+    } else {
+      const entries = await fs.readdir(dir)
+      files.push(...entries.slice(0, 30))
+    }
+    await fs.writeFile(
+      path.join(dir, '_skill.json'),
+      JSON.stringify(
+        {
+          fullName,
+          url: item?.url || `https://github.com/${fullName}`,
+          stars: item?.stars ?? null,
+          branch,
+          mode,
+          files,
+          installedAt: new Date().toISOString(),
+        },
+        null,
+        2,
+      ),
+    )
+    return { dir, mode, files }
+  }
+

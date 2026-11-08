@@ -1,0 +1,75 @@
+      // ---------- Skill 市场 ----------
+      if (url.pathname === '/api/skills' && req.method === 'GET') {
+        const q = String(url.searchParams.get('q') || '').trim().toLowerCase()
+        const force = url.searchParams.get('refresh') === '1'
+        let sm = await loadSkills()
+        const stale = !sm.fetchedAt || Date.now() - Date.parse(sm.fetchedAt) > SKILL_CACHE_MS
+        let source = 'cache'
+        let warning = ''
+        if (force || stale || !sm.items.length) {
+          try {
+            const items = await refreshSkills()
+            sm = { ...sm, items, fetchedAt: new Date().toISOString() }
+            await saveSkills(sm)
+            source = 'github'
+          } catch (e) {
+            source = sm.items.length ? 'cache' : 'empty'
+            warning = `GitHub 拉取失败：${String(e.message || e).slice(0, 160)}`
+          }
+        }
+        let items = sm.items.map((it) => {
+          const inst = sm.installed[it.id]
+          return { ...it, installed: Boolean(inst), installedAt: inst?.at || '', localPath: inst?.dir || '', installMode: inst?.mode || '' }
+        })
+        if (q) items = items.filter((it) => `${it.fullName} ${it.desc} ${it.topics.join(' ')}`.toLowerCase().includes(q))
+        json(200, { ok: true, items, fetchedAt: sm.fetchedAt, source, warning, count: items.length })
+        return true
+      }
+
+      if (url.pathname === '/api/skills/install' && req.method === 'POST') {
+        const body = JSON.parse(await readBody(req))
+        const fullName = String(body.fullName || '').trim()
+        if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(fullName)) {
+          json(400, { ok: false, error: '仓库名要写成 owner/repo' })
+          return true
+        }
+        const sm = await loadSkills()
+        const id = skillIdOf(fullName)
+        const item = sm.items.find((x) => x.fullName === fullName) || null
+        try {
+          const res = await downloadSkill(fullName, item)
+          // 顺手记一下下载量（GitHub 只有 release 资产才有下载计数）
+          let downloads = 0
+          try {
+            downloads = await fetchDownloads(fullName)
+          } catch {
+            /* 忽略 */
+          }
+          if (item && downloads > 0) {
+            item.downloads = downloads
+            await saveSkills(sm)
+          }
+          sm.installed[id] = { fullName, at: new Date().toISOString(), dir: res.dir, mode: res.mode }
+          await saveSkills(sm)
+          json(200, { ok: true, id, fullName, mode: res.mode, files: res.files, dir: res.dir, downloads })
+        } catch (e) {
+          json(200, { ok: false, error: String(e.message || e).slice(0, 240) })
+        }
+        return true
+      }
+
+      if (url.pathname === '/api/skills/remove' && req.method === 'POST') {
+        const body = JSON.parse(await readBody(req))
+        const fullName = String(body.fullName || '').trim()
+        const id = skillIdOf(fullName)
+        const sm = await loadSkills()
+        const rec = sm.installed[id]
+        if (rec) {
+          await fs.rm(rec.dir || path.join(skillsDir, id), { recursive: true, force: true })
+          delete sm.installed[id]
+          await saveSkills(sm)
+        }
+        json(200, { ok: true, id, removed: Boolean(rec) })
+        return true
+      }
+
