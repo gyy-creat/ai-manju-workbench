@@ -37,3 +37,7 @@ docs/ui-ref/
 *.7z
 *.tar.gz
 release/
+
+# 当前发布 token 缺 workflow 权限，GitHub 会拒绝推送 .github/workflows/*
+# 拿到带 Workflows: Read and write 的 token 后，删掉这一行并 git add -f .github/workflows/ci.yml
+.github/workflows/
