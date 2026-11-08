@@ -30,20 +30,23 @@
 
 ## 快速开始
 
-三种用法，按需要选一种。
+### A. 下载即用（Windows，不需要 Node.js）
 
-### A. 便携版（不想碰命令行）
+到 [Releases](https://github.com/OWNER/ai-manju-workbench/releases) 下最新那版 `AI漫剧工作台-<版本>-win-x64.zip`（约 110MB）：
 
-```bash
-npm run portable
-```
+1. 解压到任意**正常目录**（别放在带「拒绝删除子项」ACL 的目录树里，Electron 会静默退出）
+2. 双击 `AI漫剧工作台.exe`
+3. 第一次启动是空库 —— 点「新建第一部剧本」，或点「载入示例剧本」看完整链路长什么样
 
-产物在 `exports/portable/ai-manju-workbench-<版本>-portable.zip`。解压 → 双击 `start.bat` → 浏览器自动打开 `http://127.0.0.1:5273`。需要本机装一次 [Node.js 18+](https://nodejs.org)，不需要 `npm install`。
+数据不在程序目录：在 `%APPDATA%\ai-manju-workbench\data-root`，换版本、重装都不动台账。
+卸载跑安装目录里的 `卸载.bat`，数据保留。
+
+> 没有 AI key 也能把全流程跑完（选题/大纲/提示词走本地规则链）；要接自己的模型，到「设置 → AI」填地址与 key，key 只落在本机 `data/ai-config.json`，不经任何第三方。
 
 ### B. 源码运行
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/OWNER/ai-manju-workbench.git
 cd ai-manju-workbench
 npm ci
 npm run build
@@ -53,30 +56,23 @@ npm start          # → http://127.0.0.1:5273
 开发模式：`npm run dev`（vite 热更新）。
 自检：`npm run verify`（台账机检 100 分）+ `npm run smoke`（9 个接口断言，不需要任何 key）。
 
-### D. 装成 Windows 程序（推荐给非开发者）
-
-```bash
-npm run app:dir      # 解包 Electron 运行时（跳过 7za）
-npm run app:pack     # 写图标/版本 → exports/app/AI漫剧工作台 + 便携版 zip
-npm run app:install  # 装到 %LOCALAPPDATA%\Programs + 桌面图标 + 卸载脚本
-```
-
-装完双击桌面「AI漫剧工作台」，没有命令行窗口。数据在 `%APPDATA%\ai-manju-workbench\data-root`，卸载不删，安装目录里有「卸载.bat」。
-
-**两个坑**：① 不要从项目目录里直接双击 exe —— 本机项目树带「拒绝删除子项」的 ACL，Electron 会静默退出；装到用户目录或解压到任意正常目录都行。② 分发用 `exports/app/*-便携版.zip`，里面不含 `data/`，不会覆盖别人的台账。
-
-### C. 桌面窗口版
+### C. 桌面窗口版（开发用）
 
 ```bash
 npm i -D electron electron-builder
-# 然后任选一行：
 npm run app            # 正常桌面窗口
 npm run app:trouble    # 受限终端 / CI / 容器里用这个（带 --no-sandbox）
-npm run app         # 直接开一个窗口
-npm run app:dist    # 产出 exe（exports/app/）
 ```
 
-桌面版的数据存在系统 userData 目录（不是安装目录），升级软件不会冲掉台账。
+### D. 自己打安装包
+
+```bash
+npm run app:dir      # 解包 Electron 运行时（跳过 7za）
+npm run app:pack     # 写图标/版本 → exports/app/AI漫剧工作台
+npm run app:install  # 装到 %LOCALAPPDATA%\Programs + 桌面图标 + 卸载脚本
+```
+
+分发用 `node scripts/zip-utf8.mjs "exports/app/AI漫剧工作台" "exports/app/AI漫剧工作台-<版本>-win-x64.zip" --prefix "AI漫剧工作台"` —— **别用 bsdtar / Compress-Archive**：它们把中文名按 GBK 写进 zip 且不设 UTF-8 标志位，别人在 macOS/Linux 解出来是乱码目录。
 
 ## AI 接入（可选）
 
