@@ -36,7 +36,9 @@ function readSecrets() {
 }
 
 const sec = readSecrets()
-const token = process.env.GITHUB_TOKEN || sec.token || ''
+// 模板里的占位值（<待填> / ghp_xxxx）不算真 token —— 否则会拿它去打 API 再吃 401
+const clean = (v) => (/^<.*>$/.test(v || '') || /^ghp_x+$/i.test(v || '') ? '' : v || '')
+const token = clean(process.env.GITHUB_TOKEN || sec.token)
 const owner = flag('owner', sec.owner || '')
 const repo = flag('repo', sec.repo || 'ai-manju-workbench')
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
