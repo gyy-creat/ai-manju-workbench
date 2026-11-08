@@ -5,13 +5,13 @@
   "description": "AI 漫剧全流程工作台：选题 → 剧本分集 → 角色一致性 → 分镜 → 生图/生视频提示词（按模型语法族定向）→ 配音 → 剪辑 → 六项机检 → 资产对账 → 投产包导出，可选接入自己的模型接口与 ComfyUI。",
   "license": "MIT",
   "author": "ai-manju-workbench contributors",
-  "homepage": "https://github.com/beihesan/ai-manju-workbench#readme",
+  "homepage": "https://github.com/gyy-creat/ai-manju-workbench#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/beihesan/ai-manju-workbench.git"
+    "url": "git+https://github.com/gyy-creat/ai-manju-workbench.git"
   },
   "bugs": {
-    "url": "https://github.com/beihesan/ai-manju-workbench/issues"
+    "url": "https://github.com/gyy-creat/ai-manju-workbench/issues"
   },
   "keywords": [
     "ai",
