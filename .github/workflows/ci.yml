@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build + verify + smoke (node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建前端
+        run: npm run build
+
+      - name: 机检（台账自检 100 分）
+        run: npm run verify
+
+      - name: 冒烟（起服务打 9 个接口断言，不需要任何 key）
+        run: npm run smoke
+
+      - name: 便携版能打出来
+        run: npm run portable
+        if: matrix.os == 'windows-latest' && matrix.node == 22
+
+  lint-docs:
+    name: 文档与卫生检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 不该出现在仓库里的东西
+        run: |
+          set -e
+          fail=0
+          for f in data/ai-config.json settings.json data/comfy.json; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              echo "::error::敏感文件被提交了：$f"; fail=1
+            fi
+          done
+          if git ls-files | grep -Eq '\.(log)$'; then
+            echo "::error::日志文件被提交了"; fail=1
+          fi
+          exit $fail
+      - name: 后端语法
+        run: |
+          node --check server.mjs
+          node --check api.mjs

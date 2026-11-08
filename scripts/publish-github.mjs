@@ -141,7 +141,27 @@ try {
   console.log('  commit 跳过（没有新改动）')
 }
 const remoteUrl = `https://x-access-token:${token}@github.com/${owner}/${repo}.git`
-run('push', 'push', '--set-upstream', remoteUrl, 'main:main', '--force')
+const pushOut = run('push', 'push', '--set-upstream', remoteUrl, 'main:main', '--force')
+// GitHub 会拒绝没有 workflow 权限的 PAT 去创建/修改 .github/workflows/*
+// 遇到这种拒绝就把 workflow 文件移出索引、补一个提交再推一次（其余文件照推）
+if (pushOut === null) {
+  let wfBlocked = false
+  try {
+    git('push', '--set-upstream', remoteUrl, 'main:main', '--force')
+  } catch (e) {
+    const msg = ((e.stderr || '') + (e.stdout || '')).toString()
+    wfBlocked = /workflow/i.test(msg)
+  }
+  if (wfBlocked) {
+    console.log('  ⚠ PAT 缺 workflow 权限，先把 .github/workflows 移出索引再推 …')
+    try {
+      git('rm', '-r', '--cached', '-q', '.github/workflows')
+      git('commit', '-q', '-m', 'ci: 暂不纳入 GitHub Actions（当前 token 缺 workflow 权限）')
+    } catch {}
+    const again = run('push(无 workflow)', 'push', '--set-upstream', remoteUrl, 'main:main', '--force')
+    if (again === null) console.error('  push 仍未成功，检查网络代理（git config http.proxy）与 token 的 Contents 权限')
+  }
+}
 
 // 远端地址不留 token
 try {
@@ -172,29 +192,38 @@ if (rel.status === 404) {
 const relJson = await rel.json()
 console.log(`  Release: ${relJson.html_url}`)
 
-const assetName = path.basename(zipAbs)
+// GitHub Releases 的 asset name 只接受 ASCII，中文名会 400 并返回 HTML
+const rawAsset = path.basename(zipAbs)
+const assetName = /^[\x20-\x7e]+$/.test(rawAsset) ? rawAsset : `${repo}-${ver}-win-x64.zip`
 const existing = (relJson.assets || []).find((a) => a.name === assetName)
 if (existing) {
   console.log(`  附件已存在，先删旧的上传新的 …`)
   await gh(`/repos/${owner}/${repo}/releases/assets/${existing.id}`, { method: 'DELETE' })
 }
 
-const buf = fs.readFileSync(zipAbs)
-console.log(`上传 ${assetName}（${(buf.length / 1048576).toFixed(1)}MB）…`)
-const up = await fetch(`https://uploads.github.com/repos/${owner}/${repo}/releases/${relJson.id}/assets?name=${encodeURIComponent(assetName)}`, {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/zip',
-    'Content-Length': String(buf.length),
-    'User-Agent': 'ai-manju-workbench-publish',
-  },
-  body: buf,
-})
-if (!up.ok) {
-  console.error('上传失败', up.status, (await up.text()).slice(0, 400))
+const size = fs.statSync(zipAbs).size
+console.log(`上传 ${assetName}（${(size / 1048576).toFixed(1)}MB）…`)
+// 走 curl：node 的 fetch 不读系统代理，而本机 GitHub 直连会被 reset
+const PROXY = process.env.HTTPS_PROXY || process.env.https_proxy || 'http://127.0.0.1:7897'
+const upUrl = `https://uploads.github.com/repos/${owner}/${repo}/releases/${relJson.id}/assets?name=${encodeURIComponent(assetName)}`
+const args = ['-sS', '--max-time', '900', '-X', 'POST',
+  '-H', 'Authorization: Bearer ' + token,
+  '-H', 'Accept: application/vnd.github+json',
+  '-H', 'Content-Type: application/zip',
+  '--data-binary', '@' + zipAbs, upUrl]
+if (PROXY) args.unshift('--proxy', PROXY)
+let out = ''
+try {
+  out = execFileSync('curl', args, { cwd: root, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 })
+} catch (e) {
+  console.error('上传失败（curl）', ((e.stderr || '') + (e.stdout || '')).toString().slice(0, 500))
   process.exit(1)
 }
-const asset = await up.json()
+let asset = null
+try { asset = JSON.parse(out) } catch {}
+if (!asset || !asset.browser_download_url) {
+  console.error('上传返回无法解析（多半是 400，检查附件名是否含非 ASCII）：', out.slice(0, 300))
+  process.exit(1)
+}
 console.log(`  ✓ ${(asset.size / 1048576).toFixed(1)}MB  ${asset.browser_download_url}`)
 console.log(`\n完成：https://github.com/${owner}/${repo}`)
