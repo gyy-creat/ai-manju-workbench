@@ -106,15 +106,15 @@ if (r.status === 404) {
   process.exit(1)
 }
 
-// ── 2. 把占位 OWNER 换成真实 owner（只改本地文件，改动随后一起提交） ──
+// ── 2. 把占位 beihesan 换成真实 owner（只改本地文件，改动随后一起提交） ──
 for (const f of ['package.json', 'README.md']) {
   const p = path.join(root, f)
   if (!fs.existsSync(p)) continue
   let s = fs.readFileSync(p, 'utf8')
-  if (!s.includes('OWNER')) continue
-  s = s.replaceAll('OWNER', owner)
+  if (!s.includes('beihesan')) continue
+  s = s.replaceAll('beihesan', owner)
   fs.writeFileSync(p, s)
-  console.log(`  ${f}：OWNER → ${owner}`)
+  console.log(`  ${f}：beihesan → ${owner}`)
 }
 
 // ── 3. push ──

@@ -2,7 +2,7 @@
 
 > 把「AI 漫剧」从选题到成片交付的整条链，压进一个跑在自己电脑上的界面。
 
-[![CI](https://github.com/OWNER/ai-manju-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/ai-manju-workbench/actions/workflows/ci.yml)
+[![CI](https://github.com/beihesan/ai-manju-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/beihesan/ai-manju-workbench/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2b7154.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A518.17-339933.svg)](package.json)
 [![依赖](https://img.shields.io/badge/runtime-react%20%2B%20react--dom-1c1e23.svg)](package.json)
@@ -32,7 +32,7 @@
 
 ### A. 下载即用（Windows，不需要 Node.js）
 
-到 [Releases](https://github.com/OWNER/ai-manju-workbench/releases) 下最新那版 `AI漫剧工作台-<版本>-win-x64.zip`（约 110MB）：
+到 [Releases](https://github.com/beihesan/ai-manju-workbench/releases) 下最新那版 `AI漫剧工作台-<版本>-win-x64.zip`（约 110MB）：
 
 1. 解压到任意**正常目录**（别放在带「拒绝删除子项」ACL 的目录树里，Electron 会静默退出）
 2. 双击 `AI漫剧工作台.exe`
@@ -46,7 +46,7 @@
 ### B. 源码运行
 
 ```bash
-git clone https://github.com/OWNER/ai-manju-workbench.git
+git clone https://github.com/beihesan/ai-manju-workbench.git
 cd ai-manju-workbench
 npm ci
 npm run build
