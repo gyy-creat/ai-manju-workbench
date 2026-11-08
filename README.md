@@ -2,7 +2,6 @@
 
 > 把「AI 漫剧」从选题到成片交付的整条链，压进一个跑在自己电脑上的界面。
 
-[![CI](https://github.com/gyy-creat/ai-manju-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/gyy-creat/ai-manju-workbench/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2b7154.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A518.17-339933.svg)](package.json)
 [![依赖](https://img.shields.io/badge/runtime-react%20%2B%20react--dom-1c1e23.svg)](package.json)
