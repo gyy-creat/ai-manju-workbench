@@ -1,6 +1,6 @@
 {
   "name": "inkframe",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "影格 INKFRAME：AI 漫剧全流程生产台。剧本分集 → 角色一致性 → 场景环境 → 分镜 → 生图/生视频提示词（按模型语法族定向）→ 配音口型 → 资产对账 → 投产包导出，模型与 ComfyUI 走本机代理。",
   "license": "MIT",

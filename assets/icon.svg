@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!--
+    影格 INKFRAME · 应用图标
+    ─────────────────────────────
+    一个画面框（纸白 13px 细线）里，右下那一格被朱砂填满 ——
+    正是「影格」这个名字的两层意思：漫画的一格、影像的一帧，
+    以及工作台干的事：把一格格画面填成能投的片。
+
+    底板用墨色纵向微渐变（#1f232a → #0d0f12），不用纯黑：
+    纯黑在浅色任务栏上像一块洞，留一点墨的层次更稳。
+    外圈 14% 的纸白描边是防「深底融进深色任务栏」的保险丝。
+
+    小尺寸策略：16px 时框线会糊，但「白框 + 右下红块」的
+    明暗结构还在，仍读得出是一格被点亮。所以不再加任何
+    内部装饰（试过白点与格线，16px 全部糊掉）。
+  -->
+  <defs>
+    <linearGradient id="ink" x1="0" y1="0" x2="0.25" y2="1">
+      <stop offset="0" stop-color="#1f232a"/>
+      <stop offset="0.55" stop-color="#15181d"/>
+      <stop offset="1" stop-color="#0d0f12"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="256" height="256" rx="58" fill="url(#ink)"/>
+  <rect x="1" y="1" width="254" height="254" rx="57" fill="none" stroke="#f7f4ee" stroke-opacity="0.14" stroke-width="2"/>
+  <rect x="47" y="53" width="162" height="150" rx="14" fill="none" stroke="#f7f4ee" stroke-width="13"/>
+  <rect x="130" y="126" width="66" height="65" rx="7" fill="#e0533a"/>
+</svg>
