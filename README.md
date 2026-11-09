@@ -33,7 +33,7 @@
 
 ### A. 下载即用（Windows，不需要 Node.js）
 
-到 [Releases](https://github.com/gyy-creat/inkframe/releases) 下最新那版 `inkframe-<版本>-win-x64.zip`（约 114MB；GitHub 只收 ASCII 附件名，包内目录仍是中文「影格」）：
+到 [Releases](https://github.com/gyy-creat/ai-manju-workbench/releases) 下最新那版 `inkframe-<版本>-win-x64.zip`（约 114MB；GitHub 只收 ASCII 附件名，包内目录仍是中文「影格」）：
 
 1. 解压到任意**正常目录**（别放在带「拒绝删除子项」ACL 的目录树里，Electron 会静默退出）
 2. 双击 `影格.exe`
@@ -47,7 +47,7 @@
 ### B. 源码运行
 
 ```bash
-git clone https://github.com/gyy-creat/inkframe.git
+git clone https://github.com/gyy-creat/ai-manju-workbench.git inkframe
 cd inkframe
 npm ci
 npm run build
