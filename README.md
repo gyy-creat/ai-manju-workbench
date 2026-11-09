@@ -31,7 +31,7 @@
 
 ### A. 下载即用（Windows，不需要 Node.js）
 
-到 [Releases](https://github.com/gyy-creat/ai-manju-workbench/releases) 下最新那版 `AI漫剧工作台-<版本>-win-x64.zip`（约 110MB）：
+到 [Releases](https://github.com/gyy-creat/ai-manju-workbench/releases) 下最新那版 `ai-manju-workbench-<版本>-win-x64.zip`（约 114MB；GitHub 只收 ASCII 附件名，包内目录仍是中文「AI漫剧工作台」）：
 
 1. 解压到任意**正常目录**（别放在带「拒绝删除子项」ACL 的目录树里，Electron 会静默退出）
 2. 双击 `AI漫剧工作台.exe`
