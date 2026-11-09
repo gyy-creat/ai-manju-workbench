@@ -1,6 +1,8 @@
-# AI 漫剧工作台
+# 影格 · INKFRAME
 
-> 把「AI 漫剧」从剧本到成片交付的整条链，压进一个跑在自己电脑上的界面。
+> AI 漫剧生产台：把「一句话」到「一条能投的片」的整条链，压进一个跑在自己电脑上的界面。
+
+「影格」是电影里「帧」的旧译 —— 一格是漫画的分格，一格是影像的一帧，中间的每一道工序都落在同一格纸上。
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2b7154.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A518.17-339933.svg)](package.json)
@@ -31,13 +33,13 @@
 
 ### A. 下载即用（Windows，不需要 Node.js）
 
-到 [Releases](https://github.com/gyy-creat/ai-manju-workbench/releases) 下最新那版 `ai-manju-workbench-<版本>-win-x64.zip`（约 114MB；GitHub 只收 ASCII 附件名，包内目录仍是中文「AI漫剧工作台」）：
+到 [Releases](https://github.com/gyy-creat/inkframe/releases) 下最新那版 `inkframe-<版本>-win-x64.zip`（约 114MB；GitHub 只收 ASCII 附件名，包内目录仍是中文「影格」）：
 
 1. 解压到任意**正常目录**（别放在带「拒绝删除子项」ACL 的目录树里，Electron 会静默退出）
-2. 双击 `AI漫剧工作台.exe`
+2. 双击 `影格.exe`
 3. 第一次启动是空库 —— 点「新建第一部剧本」，或点「载入示例剧本」看完整链路长什么样
 
-数据不在程序目录：在 `%APPDATA%\ai-manju-workbench\data-root`，换版本、重装都不动台账。
+数据不在程序目录：在 `%APPDATA%\ai-manju-workbench\data-root` —— 目录名是历史名（品牌旧称），**故意不改**，改了就等于换一个空库；换版本、重装、卸载都不动台账。
 卸载跑安装目录里的 `卸载.bat`，数据保留。
 
 > **必须先接入一个模型**：分集、分镜、场景、提示词全部由模型生成，没 key 这几道工序直接报「未接入 AI」。到「设置 → AI 接入」填 baseUrl / 模型名 / key，key 只落在本机 `data/ai-config.json`，不经任何第三方。
@@ -45,8 +47,8 @@
 ### B. 源码运行
 
 ```bash
-git clone https://github.com/gyy-creat/ai-manju-workbench.git
-cd ai-manju-workbench
+git clone https://github.com/gyy-creat/inkframe.git
+cd inkframe
 npm ci
 npm run build
 npm start          # → http://127.0.0.1:5273
@@ -67,13 +69,13 @@ npm run app:trouble    # 受限终端 / CI / 容器里用这个（带 --no-sandb
 
 ```bash
 npm run app:dir      # 解包 Electron 运行时（跳过 7za）
-npm run app:pack     # 写图标/版本 → exports/app/AI漫剧工作台
+npm run app:pack     # 写图标/版本 → exports/app/影格
 npm run app:install  # 装到 %LOCALAPPDATA%\Programs + 桌面图标 + 卸载脚本
 ```
 
-分发用 `node scripts/zip-utf8.mjs "exports/app/AI漫剧工作台" "exports/app/AI漫剧工作台-<版本>-win-x64.zip" --prefix "AI漫剧工作台"` —— **别用 bsdtar / Compress-Archive**：它们把中文名按 GBK 写进 zip 且不设 UTF-8 标志位，别人在 macOS/Linux 解出来是乱码目录。
+分发用 `node scripts/zip-utf8.mjs "exports/app/影格" "exports/app/影格-<版本>-win-x64.zip" --prefix "影格"` —— **别用 bsdtar / Compress-Archive**：它们把中文名按 GBK 写进 zip 且不设 UTF-8 标志位，别人在 macOS/Linux 解出来是乱码目录。
 
-## AI 接入（可选）
+## AI 接入（必需）
 
 **模型是必需项**：分集、分镜、场景、提示词都由模型生成（走本机 `/api/ai` 代理，你的 key 不外发）；机检、分镜表、投产包导出这些仍是本地计算。
 
@@ -120,7 +122,7 @@ exports/                   投产包与便携版
 ## 目录结构
 
 ```
-ai-manju-workbench/
+inkframe/
 ├─ index.html
 ├─ vite.config.js        开发服务器 + 把 /api 挂到 vite 中间件
 ├─ api.mjs               全部后端：剧本库 / AI 代理 / 小说转镜头 / 提示词定向 / Skill 市场 / ComfyUI / 导出

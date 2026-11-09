@@ -1,7 +1,7 @@
 /**
  * 把 win-unpacked 组装成可交付形态：
- *   1. 搬到 exports/app/AI漫剧工作台/（中文目录名，用户看得懂）
- *   2. exe 改成中文名「AI漫剧工作台.exe」
+ *   1. 搬到 exports/app/影格/（中文目录名，用户看得懂）
+ *   2. exe 改成中文名「影格.exe」
  *   3. 打一个 zip 分发包（用 bsdtar，7za 在本机被系统拦了写不了）
  *   4. 在桌面建快捷方式，指向这个 exe
  *
@@ -16,12 +16,12 @@ import { execFileSync } from 'node:child_process';
 
 const SRC = 'C:/mjw-build/win-unpacked';
 const OUT_DIR = path.resolve('exports/app');
-const APP_DIR = path.join(OUT_DIR, 'AI漫剧工作台');
+const APP_DIR = path.join(OUT_DIR, '影格');
 const OLD_EXE = path.join(APP_DIR, 'AI-Manju-Workbench.exe');
-const NEW_EXE = path.join(APP_DIR, 'AI漫剧工作台.exe');
+const NEW_EXE = path.join(APP_DIR, '影格.exe');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const version = pkg.version;
-const ZIP = path.join(OUT_DIR, `AI漫剧工作台-${version}-便携版.zip`);
+const ZIP = path.join(OUT_DIR, `影格-${version}-便携版.zip`);
 
 const log = (...a) => console.log('·', ...a);
 
@@ -44,14 +44,14 @@ if (fs.existsSync(OLD_EXE)) {
 
 // 3) 打 zip（bsdtar，Windows 自带）
 if (fs.existsSync(ZIP)) fs.rmSync(ZIP);
-execFileSync('tar', ['-a', '-c', '-f', ZIP, '-C', OUT_DIR, 'AI漫剧工作台'], {
+execFileSync('tar', ['-a', '-c', '-f', ZIP, '-C', OUT_DIR, '影格'], {
   stdio: ['ignore', 'ignore', 'pipe'],
 });
 const zipMB = (fs.statSync(ZIP).size / 1024 / 1024).toFixed(1);
 log(`zip 已生成 ${path.basename(ZIP)}（${zipMB} MB）`);
 
 // 4) 桌面快捷方式
-const lnk = 'C:/Users/Administrator/Desktop/AI漫剧工作台.lnk';
+const lnk = 'C:/Users/Administrator/Desktop/影格.lnk';
 const ps = `
 $ws = New-Object -ComObject WScript.Shell
 $s = $ws.CreateShortcut('${lnk.replace(/'/g, "''")}')
@@ -72,4 +72,4 @@ try {
 // 汇总
 const exeMB = (fs.statSync(NEW_EXE).size / 1024 / 1024).toFixed(0);
 log(`exe ${exeMB} MB，目录总计 ${(fs.statSync(APP_DIR).size / 1024 / 1024).toFixed(0)} MB`);
-console.log('\n完成：双击桌面「AI漫剧工作台」或', NEW_EXE);
+console.log('\n完成：双击桌面「影格」或', NEW_EXE);

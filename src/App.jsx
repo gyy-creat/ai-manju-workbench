@@ -219,9 +219,10 @@ export default function App() {
       {!isHome && (
         <aside className="sidebar">
           <div className="brand">
-            <div className="brand-mark">漫</div>
+            <div className="brand-mark">影</div>
             <div className="brand-text">
-              <h1>AI 漫剧工作台</h1>
+              <h1>影格</h1>
+              <div className="brand-en">INKFRAME</div>
               <div className="sub">
                 {pf?.name} · {st?.name}
               </div>

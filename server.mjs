@@ -68,7 +68,7 @@ const server = http.createServer(async (req, res) => {
 })
 
 server.listen(PORT, HOST, () => {
-  console.log(`AI漫剧工作台 → http://${HOST}:${PORT}`)
+  console.log(`影格 INKFRAME → http://${HOST}:${PORT}`)
   console.log(`台账：${path.join(root, 'data', 'library.json')}`)
   console.log(`导出：${path.join(root, 'exports')}`)
 })

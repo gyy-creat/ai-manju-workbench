@@ -2,7 +2,7 @@
 import { emptyVoiceProfile } from './voice.js'
 import { DEFAULT_MODEL_ID, modelById } from './imageModels.js'
 
-export const APP_NAME = 'AI漫剧工作台'
+export const APP_NAME = '影格'
 
 export const PLATFORMS = {
   douyin: {

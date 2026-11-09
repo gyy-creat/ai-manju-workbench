@@ -9,17 +9,17 @@
  *   就正常。分发出去的 zip 解压到任何正常目录都没这个问题。
  *
  * 用法：node scripts/install-app.mjs [源目录]
- *   源目录默认 exports/app/AI漫剧工作台（由 scripts/assemble-app.mjs 生成）
+ *   源目录默认 exports/app/影格（由 scripts/assemble-app.mjs 生成）
  */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const SRC = path.resolve(process.argv[2] || 'exports/app/AI漫剧工作台');
+const SRC = path.resolve(process.argv[2] || 'exports/app/影格');
 const LOCAL = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
-const DST = path.join(LOCAL, 'Programs', 'AI漫剧工作台');
-const EXE_NAME = 'AI漫剧工作台.exe';
+const DST = path.join(LOCAL, 'Programs', '影格');
+const EXE_NAME = '影格.exe';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const log = (...a) => console.log('·', ...a);
 
@@ -38,7 +38,7 @@ try {
 } catch (e) {
   rc = Number(e.status) || 0;
   if (rc >= 8) {
-    console.error(`robocopy 失败（退出码 ${rc}）：目标目录里的文件可能正被占用，先关掉「AI漫剧工作台」再重试`);
+    console.error(`robocopy 失败（退出码 ${rc}）：目标目录里的文件可能正被占用，先关掉「影格」再重试`);
     process.exit(1);
   }
 }
@@ -47,8 +47,8 @@ log(`已复制 ${fileCount} 个顶层条目`);
 
 // 2) 快捷方式：桌面 + 开始菜单
 const targets = [
-  path.join(os.homedir(), 'Desktop', 'AI漫剧工作台.lnk'),
-  path.join(process.env.APPDATA || '', 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'AI漫剧工作台.lnk'),
+  path.join(os.homedir(), 'Desktop', '影格.lnk'),
+  path.join(process.env.APPDATA || '', 'Microsoft', 'Windows', 'Start Menu', 'Programs', '影格.lnk'),
 ].filter(Boolean);
 for (const lnk of targets) {
   const ps = `
@@ -71,14 +71,14 @@ $s.Save()
 // 3) 卸载脚本（放在安装目录里，用户想删就双击）
 const uninstall = `@echo off
 chcp 936 >nul
-echo 正在关闭 AI 漫剧工作台...
+echo 正在关闭 影格 ...
 taskkill /IM "${EXE_NAME}" /F >nul 2>&1
 timeout /t 2 >nul
 echo 正在删除程序文件（剧本数据不会动，在 %APPDATA%\\ai-manju-workbench）...
 cd /d "%~dp0"
 start "" /wait cmd /c "timeout /t 1 >nul & rmdir /s /q "${DST}""
-del "%USERPROFILE%\\Desktop\\AI漫剧工作台.lnk" >nul 2>&1
-del "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\AI漫剧工作台.lnk" >nul 2>&1
+del "%USERPROFILE%\\Desktop\\影格.lnk" >nul 2>&1
+del "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\影格.lnk" >nul 2>&1
 echo 已卸载。剧本与配置保留在 %APPDATA%\\ai-manju-workbench，可手动删除。
 pause
 `;
@@ -88,9 +88,9 @@ log('卸载脚本 → 安装目录\\卸载.bat');
 console.log(`
 装好了。
 
-  启动：双击桌面「AI漫剧工作台」
+  启动：双击桌面「影格」
   程序：${path.join(DST, EXE_NAME)}
-  数据：%APPDATA%\\ai-manju-workbench\\data-root（剧本、上传图、渲染结果都在这里，卸载不删）
+  数据：%APPDATA%\\ai-manju-workbench\\data-root（目录名沿用历史名，勿改：改了等于换库，剧本会「消失」）
   卸载：安装目录里的「卸载.bat」
 
 第一次启动会在 %LOCALAPPDATA%\\Programs 下解压界面资源，约 3-6 秒；之后是正常的窗口启动速度。

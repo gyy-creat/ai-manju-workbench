@@ -1,5 +1,5 @@
 /* =========================================================
-   AI 漫剧工作台 · 画稿台视觉系统（v2 重做）
+   影格 INKFRAME · 画稿台视觉系统（v3）
    设计意图：一张漫画分镜台。墨色底、纸色字、朱砂印章做唯一强调；
    剧本卡是「分格」，粗墨边 + 硬投影；封面用网点（halftone）做底纹。
    只用手写 CSS，不引依赖。所有 class 名与 JSX 保持一致。
@@ -202,6 +202,16 @@ h4 {
   font: 600 13.5px/1.2 var(--font);
   color: var(--paper);
 }
+.brand-text .brand-en {
+  margin-top: 3px;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  color: var(--paper-4);
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
 .brand-text .sub {
   margin-top: 2px;
   font-size: 10.5px;

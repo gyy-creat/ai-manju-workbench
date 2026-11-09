@@ -12,7 +12,7 @@ const pexec = promisify(execFile)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
 const VER = pkg.version || '0.0.0'
-const NAME = `ai-manju-workbench-${VER}-portable`
+const NAME = `inkframe-${VER}-portable`
 const outRoot = path.join(root, 'exports', 'portable')
 const stage = path.join(outRoot, NAME)
 
@@ -64,7 +64,7 @@ node server.mjs
 if errorlevel 1 pause
 `
 
-const README_TXT = `AI 漫剧工作台 ${VER} — 便携版
+const README_TXT = `影格 INKFRAME ${VER} — 便携版
 ========================================
 
 1) 装 Node.js 18 或更新版本（只需一次）：https://nodejs.org
@@ -112,7 +112,7 @@ async function main() {
   await fs.writeFile(path.join(stage, 'README.txt'), '\ufeff' + README_TXT, 'utf8')
   await fs.writeFile(
     path.join(stage, 'VERSION.txt'),
-    `ai-manju-workbench ${VER}\nbuilt ${new Date().toISOString()}\n`
+    `inkframe ${VER}\nbuilt ${new Date().toISOString()}\n`
   )
 
   const zip = path.join(outRoot, `${NAME}.zip`)

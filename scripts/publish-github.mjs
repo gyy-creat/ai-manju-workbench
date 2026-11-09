@@ -43,7 +43,7 @@ const owner = flag('owner', sec.owner || '')
 const repo = flag('repo', sec.repo || 'ai-manju-workbench')
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 const ver = pkg.version
-const zipRel = `exports/app/AI漫剧工作台-${ver}-win-x64.zip`
+const zipRel = `exports/app/影格-${ver}-win-x64.zip`
 const zipAbs = path.join(root, zipRel)
 
 if (has('dry')) {
@@ -175,14 +175,14 @@ if (!fs.existsSync(zipAbs)) {
 }
 const tag = `v${ver}`
 const notesPath = path.join(root, '.github', `RELEASE-${ver}.md`)
-const body = fs.existsSync(notesPath) ? fs.readFileSync(notesPath, 'utf8') : `AI 漫剧工作台 ${ver}`
+const body = fs.existsSync(notesPath) ? fs.readFileSync(notesPath, 'utf8') : `影格 INKFRAME ${ver}`
 
 let rel = await gh(`/repos/${owner}/${repo}/releases/tags/${tag}`)
 if (rel.status === 404) {
   console.log(`建 Release ${tag} …`)
   rel = await gh(`/repos/${owner}/${repo}/releases`, {
     method: 'POST',
-    body: JSON.stringify({ tag_name: tag, name: `AI 漫剧工作台 ${ver}`, body, draft: false, prerelease: false }),
+    body: JSON.stringify({ tag_name: tag, name: `影格 INKFRAME ${ver}`, body, draft: false, prerelease: false }),
   })
   if (!rel.ok) {
     console.error('建 Release 失败', rel.status, (await rel.text()).slice(0, 400))

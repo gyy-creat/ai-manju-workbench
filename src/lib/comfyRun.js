@@ -6,7 +6,7 @@
 
 export const COMFY_RUN_SCRIPT = String.raw`#!/usr/bin/env node
 /**
- * ComfyUI 任务包执行器 —— 由「AI 漫剧工作台」导出，零依赖，node 18+ 可直接跑。
+ * ComfyUI 任务包执行器 —— 由「影格 INKFRAME」导出，零依赖，node 18+ 可直接跑。
  *
  * 用法：
  *   node comfy-run.mjs                        # 跑全部

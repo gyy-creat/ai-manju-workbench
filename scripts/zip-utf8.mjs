@@ -8,7 +8,7 @@
 //   node scripts/zip-utf8.mjs <源目录> <输出.zip> [--strip 顶层目录名]
 //
 // 例：
-//   node scripts/zip-utf8.mjs "exports/app/AI漫剧工作台" "exports/app/AI漫剧工作台-0.2.0-便携版.zip"
+//   node scripts/zip-utf8.mjs "exports/app/影格" "exports/app/影格-0.3.0-便携版.zip"
 import fs from 'node:fs'
 import path from 'node:path'
 import zlib from 'node:zlib'

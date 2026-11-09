@@ -1,8 +1,8 @@
 {
-  "name": "ai-manju-workbench",
-  "version": "0.2.1",
+  "name": "inkframe",
+  "version": "0.3.0",
   "type": "module",
-  "description": "AI 漫剧全流程工作台：选题 → 剧本分集 → 角色一致性 → 分镜 → 生图/生视频提示词（按模型语法族定向）→ 配音 → 剪辑 → 六项机检 → 资产对账 → 投产包导出，可选接入自己的模型接口与 ComfyUI。",
+  "description": "影格 INKFRAME：AI 漫剧全流程生产台。剧本分集 → 角色一致性 → 场景环境 → 分镜 → 生图/生视频提示词（按模型语法族定向）→ 配音口型 → 资产对账 → 投产包导出，模型与 ComfyUI 走本机代理。",
   "license": "MIT",
   "author": "ai-manju-workbench contributors",
   "homepage": "https://github.com/gyy-creat/ai-manju-workbench#readme",
@@ -48,9 +48,9 @@
     "app:install": "node scripts/install-app.mjs"
   },
   "build": {
-    "appId": "dev.aimanju.workbench",
-    "productName": "AI 漫剧工作台",
-    "copyright": "Copyright © 2026 AI 漫剧工作台 contributors",
+    "appId": "dev.inkframe.app",
+    "productName": "影格",
+    "copyright": "Copyright © 2026 影格 INKFRAME contributors",
     "asar": false,
     "files": [
       "electron/**/*",
@@ -85,11 +85,11 @@
           ]
         }
       ],
-      "artifactName": "AI漫剧工作台-${version}-x64.${ext}",
-      "executableName": "AI-Manju-Workbench"
+      "artifactName": "inkframe-${version}-x64.${ext}",
+      "executableName": "影格"
     },
     "portable": {
-      "artifactName": "AI漫剧工作台-${version}-便携版.exe"
+      "artifactName": "inkframe-${version}-portable.exe"
     },
     "nsis": {
       "oneClick": false,
@@ -97,8 +97,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "AI 漫剧工作台",
-      "artifactName": "AI漫剧工作台-${version}-安装包.exe"
+      "shortcutName": "影格",
+      "artifactName": "inkframe-${version}-setup.exe"
     },
     "compression": "normal",
     "electronDist": "node_modules/electron/dist"

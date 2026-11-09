@@ -32,6 +32,13 @@ const APP_ROOT = path.dirname(here) // 项目根 / 安装目录
 const SERVER = path.join(APP_ROOT, 'server.mjs')
 const ICON = path.join(APP_ROOT, 'assets', 'icon.ico')
 
+// 品牌 0.3.0 从「AI 漫剧工作台」更名「影格」，但 userData 必须钉死在旧目录：
+// Electron 的 userData 默认取 productName，跟着改名会让 %APPDATA% 换一个文件夹，
+// 用户此前所有剧本就"消失"了。目录名保持 ai-manju-workbench，只是界面与程序名换了。
+try {
+  app.setPath('userData', path.join(app.getPath('appData'), 'ai-manju-workbench'))
+} catch {}
+
 const DATA_ROOT = path.join(app.getPath('userData'), 'data-root')
 const STATE_FILE = path.join(app.getPath('userData'), 'window-state.json')
 
@@ -174,7 +181,7 @@ function createWindow() {
     minWidth: 1080,
     minHeight: 680,
     backgroundColor: '#ffffff',
-    title: 'AI 漫剧工作台',
+    title: '影格',
     icon,
     autoHideMenuBar: true,
     show: false, // 等首帧就绪再显示，避免白闪
@@ -277,7 +284,7 @@ function buildMenu() {
           label: '关于',
           click: () =>
             dialog.showMessageBox({
-              message: 'AI 漫剧工作台',
+              message: '影格',
               detail: `版本 ${app.getVersion()}\n后端 ${baseUrl || '（未启动）'}\n数据 ${DATA_ROOT}`,
             }),
         },
