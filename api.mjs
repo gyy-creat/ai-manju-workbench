@@ -12,6 +12,7 @@ import { modelById, modelSpecText } from './src/lib/imageModels.js'
 import { videoModelById, videoModelSpecText, clampVideoDur, fillVideoParams } from './src/lib/videoModels.js'
 import { deriveScenesLocal, buildSceneMessages, normalizeSceneResult } from './src/lib/scenes.js'
 import { createSkillHub } from './src/lib/skills.js'
+import { boomScore, levelOf } from './src/lib/splitter.js'
 
 const DATA_DIR = 'data'
 const SCRIPT_DIR = 'scripts'
@@ -736,6 +737,85 @@ function attachSourceText(project, text) {
     e.sourceText = all.slice(i * per, (i + 1) * per).join('')
   })
   return project
+}
+
+/* ── AI 分集：模型只决定切点，原文逐字不改 ── */
+function buildSplitMessages(text, opts = {}) {
+  const target = opts.targetChars || 1500
+  const sys = [
+    '你是竖屏短剧的分集编剧。',
+    '任务：把用户给的小说原文切成若干集。每一集的正文必须逐字复制原文，不许改写、不许润色、不许增删标点。',
+    '只输出 JSON，不要解释。',
+  ].join('\n')
+  const user = [
+    `平台：${opts.platformName || '抖音'}｜单集时长：${opts.episodeSec || '60–90s'}｜画风：${opts.styleName || '—'}`,
+    `原文（共 ${cnLen(text)} 字）：`,
+    text,
+    '',
+    '要求：',
+    `1. 每集 ${target} 字左右（上下浮动不超过 40%），切点必须落在句子边界上，不许把一个句子劈成两集。`,
+    '2. 每集开头要有钩子：前 3 秒能抓住人的冲突句（原文里有就选它，不要自己写）。',
+    '3. 每段 text 必须是从原文里原样复制的连续片段：不许改字、不许改标点、不许用省略号省略、不许补写。段与段首尾相接，不重叠、不遗漏，拼起来等于原文。',
+    '4. title ≤14 字，像剧名，从这一段最抓人的那句里提炼；hook ≤20 字，直接引这一集最狠的一句原文。',
+    '5. 输出格式：{"segments":[{"title":"","hook":"","text":"原文片段"}]}',
+  ].join('\n')
+  return [
+    { role: 'system', content: sys },
+    { role: 'user', content: user },
+  ]
+}
+
+const normTxt = (x) => String(x || '').replace(/\s+/g, '')
+
+/** 校验模型切出来的片段确实是原文连续子串，并补齐密度 / 等级 / 标题等统计 */
+function analyzeAiSegments(rawList, source, targetChars) {
+  const normSrc = normTxt(source)
+  const out = []
+  let cursor = 0
+  for (const it of rawList || []) {
+    const text = String(it?.text || '').trim()
+    if (!text) continue
+    const n = normTxt(text)
+    const at = normSrc.indexOf(n, Math.max(0, cursor - 40))
+    if (at < 0) throw new Error('模型返回的片段不是原文连续片段（改写过或跳过了内容），请重新点一次分集')
+    cursor = at + n.length
+    const sents = splitSentences(text)
+    const scored = sents.map((x) => ({ s: x, n: cnLen(x), boom: boomScore(x) }))
+    const chars = scored.reduce((m, x) => m + x.n, 0)
+    const bursts = scored.filter((x) => x.boom >= 4)
+    const dense = scored.length ? (bursts.length / scored.length) * 10 : 0
+    const lv = levelOf(dense)
+    const strongest = scored.length ? scored.reduce((a, b) => (b.boom > a.boom ? b : a), scored[0]) : { s: '' }
+    out.push({
+      id: `seg_${out.length + 1}`,
+      no: out.length + 1,
+      text,
+      chars,
+      sents: scored.length,
+      booms: bursts.length,
+      boomSum: scored.reduce((m, x) => m + x.boom, 0),
+      density: Math.round(dense * 10) / 10,
+      level: lv.id,
+      levelLabel: lv.label,
+      levelTone: lv.level,
+      hook: String(it?.hook || '').trim().slice(0, 60) || strongest.s.slice(0, 60),
+      title:
+        String(it?.title || '').trim().slice(0, 20) ||
+        strongest.s.replace(/[。！？!?…；;，,、]+$/g, '').slice(0, 16),
+      head: (scored[0]?.s || '').slice(0, 40),
+      scenes: 0,
+      estShots: Math.max(8, Math.min(40, Math.round(chars / 75))),
+    })
+  }
+  const stats = {
+    chars: cnLen(source),
+    sents: splitSentences(source).length,
+    eps: out.length,
+    avgChars: out.length ? Math.round(out.reduce((m, x) => m + x.chars, 0) / out.length) : 0,
+    boomCount: out.reduce((m, x) => m + x.booms, 0),
+    targetChars,
+  }
+  return { segments: out, stats }
 }
 
 function localOutline(text, opts = {}) {
@@ -1883,9 +1963,9 @@ export function createApi(rootDir) {
         }
         const cfg = await readAiConfig()
         if (!cfg.apiKey || !cfg.baseUrl) {
-          json(400, {
+          json(503, {
             ok: false,
-            error: '还没配置模型接口——先去「项目设置」的 AI 面板填 baseUrl / 模型名 / key，或直接用本地模板版',
+            error: '未接入 AI：提示词只由模型定向生成，请先在「设置 → AI 接入」填 baseUrl / 模型名 / key',
           })
           return true
         }
@@ -1951,19 +2031,11 @@ export function createApi(rootDir) {
           existing: Array.isArray(body.existing) ? body.existing.slice(0, 60) : [],
           epIds: Array.isArray(body.epIds) ? body.epIds.map(String) : [],
         }
-        const mode = body.mode === 'local' ? 'local' : 'auto'
         const cfg = await readAiConfig()
-        const canLlm = !!cfg.apiKey && !!cfg.baseUrl
-
-        if (mode === 'local' || !canLlm) {
-          const r = deriveScenesLocal(text, opts)
-          json(200, {
-            ok: true,
-            engine: 'local',
-            reason: canLlm ? '按选择走本地规则' : '未配置 API key，走本地规则',
-            chars: cnLen(text),
-            scenes: r.scenes,
-            questions: r.questions,
+        if (!cfg.apiKey || !cfg.baseUrl) {
+          json(503, {
+            ok: false,
+            error: '未接入 AI：场景只由模型生成，请先在「设置 → AI 接入」填 baseUrl / 模型名 / key',
           })
           return true
         }
@@ -1981,11 +2053,8 @@ export function createApi(rootDir) {
           questions = r.questions
           if (!scenes.length) throw new Error('模型没给出 scenes')
         } catch (e) {
-          engine = 'local'
-          warn = '模型调用失败，已回落本地规则：' + String(e?.message || e).slice(0, 200)
-          const r = deriveScenesLocal(text, opts)
-          scenes = r.scenes
-          questions = r.questions
+          json(502, { ok: false, error: '模型调用失败：' + String(e?.message || e).slice(0, 300) })
+          return true
         }
         json(200, {
           ok: true,
@@ -1996,6 +2065,54 @@ export function createApi(rootDir) {
           scenes,
           questions,
         })
+        return true
+      }
+
+      // ---- AI 分集：按剧情把长文切成多集（模型只切，不改原文）----
+      if (url.pathname === '/api/novel/split' && req.method === 'POST') {
+        const body = JSON.parse(await readBody(req))
+        const text = String(body.text || '')
+        if (cnLen(text) < 300) {
+          json(400, { ok: false, error: `正文太少（当前 ${cnLen(text)} 字），至少 300 字再来分集` })
+          return true
+        }
+        const cfg = await readAiConfig()
+        if (!cfg.apiKey || !cfg.baseUrl) {
+          json(503, {
+            ok: false,
+            error: '未接入 AI：分集只由模型生成，请先在「设置 → AI 接入」填 baseUrl / 模型名 / key',
+          })
+          return true
+        }
+        const targetChars = clampInt(body.targetChars, 600, 5000, 1500)
+        const t0 = Date.now()
+        try {
+          const out = await callLlm(
+            cfg,
+            buildSplitMessages(text, {
+              targetChars,
+              platformName: body.platformName || '',
+              styleName: body.styleName || '',
+              episodeSec: body.episodeSec || '',
+            }),
+            { timeout: 300000, jsonMode: true },
+          )
+          const data = extractJson(out.content)
+          const list = Array.isArray(data?.segments) ? data.segments : []
+          if (!list.length) throw new Error('模型没给出 segments')
+          const r = analyzeAiSegments(list, text, targetChars)
+          if (!r.segments.length) throw new Error('模型给出的片段都不在原文里')
+          json(200, {
+            ok: true,
+            engine: 'llm',
+            ms: Date.now() - t0,
+            usage: out.usage || null,
+            segments: r.segments,
+            stats: r.stats,
+          })
+        } catch (e) {
+          json(502, { ok: false, error: `模型调用失败：${String(e?.message || e).slice(0, 300)}` })
+        }
         return true
       }
 
@@ -2018,23 +2135,11 @@ export function createApi(rootDir) {
           episodeSec: body.episodeSec || '',
           prev: normalizePrev(body.prev),
         }
-        const mode = body.mode === 'local' ? 'local' : 'auto'
         const cfg = await readAiConfig()
-        const canLlm = !!cfg.apiKey && !!cfg.baseUrl
-
-        if (mode === 'local' || !canLlm) {
-          const project = attachSourceText(localOutline(text, opts), text)
-          const hint = project.hint || ''
-          delete project.hint
-          json(200, {
-            ok: true,
-            engine: 'local',
-            reason: canLlm ? '按选择走本地规则' : '未配置 API key，走本地规则',
-            skillName: opts.skillName || '',
-            skillNames: opts.skillNames || [],
-            hint: hint || undefined,
-            stats: { chars: cnLen(text), episodes: project.episodes.length, shots: project.episodes.reduce((n, e) => n + e.shots.length, 0) },
-            project,
+        if (!cfg.apiKey || !cfg.baseUrl) {
+          json(503, {
+            ok: false,
+            error: '未接入 AI：分集与分镜只由模型生成，请先在「设置 → AI 接入」填 baseUrl / 模型名 / key',
           })
           return true
         }
@@ -2059,9 +2164,8 @@ export function createApi(rootDir) {
           attachSourceText(project, text)
           if (out.usage) warn = `tokens ${out.usage.total_tokens ?? '-'}`
         } catch (e) {
-          engine = 'local'
-          warn = `模型调用失败，已回落本地规则：${String(e?.message || e).slice(0, 200)}`
-          project = attachSourceText(localOutline(text, opts), text)
+          json(502, { ok: false, error: `模型调用失败：${String(e?.message || e).slice(0, 300)}` })
+          return true
         }
         const hint = project.hint || ''
         delete project.hint

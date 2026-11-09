@@ -64,6 +64,14 @@ export default function VideoPrompts({ notify }) {
   const negative = showAi ? ai.negative : v?.negative || ''
   const params = showAi ? ai.params || v?.params : v?.params || ''
 
+  const [aiReady, setAiReady] = useState(false)
+  useEffect(() => {
+    fetch('/api/ai/config')
+      .then((r) => r.json())
+      .then((j) => setAiReady(Boolean(j?.config?.hasKey)))
+      .catch(() => {})
+  }, [])
+
   const push = (body, label) => {
     copyText(body)
       .then(() => notify?.(label))
@@ -220,6 +228,11 @@ export default function VideoPrompts({ notify }) {
             }}
           />
         </div>
+        {!aiReady && (
+          <div className="ai-gate">
+            未接入 AI：视频提示词只由模型定向生成。先在「设置 → AI 接入」填 baseUrl / 模型名 / key。
+          </div>
+        )}
         <div className="links">
           {busy ? (
             <Btn size="sm" variant="ghost" onClick={stopAi}>
@@ -227,8 +240,8 @@ export default function VideoPrompts({ notify }) {
             </Btn>
           ) : (
             <>
-              <Btn size="sm" onClick={() => runAi([shot])}>AI 定向 · 本镜</Btn>
-              <Btn size="sm" onClick={() => runAi(shots)}>AI 定向 · 本集</Btn>
+              <Btn size="sm" onClick={() => runAi([shot])} disabled={!aiReady}>AI 定向 · 本镜</Btn>
+              <Btn size="sm" onClick={() => runAi(shots)} disabled={!aiReady}>AI 定向 · 本集</Btn>
             </>
           )}
           <Btn size="sm" variant="ghost" onClick={copyOne}>复制本镜</Btn>

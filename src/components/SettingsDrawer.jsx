@@ -260,7 +260,6 @@ export default function SettingsDrawer({ open, onClose, notify }) {
       episodes: project.episodes.length,
       shots: project.episodes.reduce((n, e) => n + e.shots.length, 0),
       chars: project.characters.length,
-      topics: project.topics.length,
       assets: project.assets.length,
     }
   }, [project])
@@ -481,7 +480,6 @@ export default function SettingsDrawer({ open, onClose, notify }) {
                         <>
                           <span className="dim" style={{ fontSize: 11.5 }}>{stats.episodes} 集 · {stats.shots} 镜</span>
                           <span className="dim" style={{ fontSize: 11.5 }}>{stats.chars} 角色</span>
-                          <span className="dim" style={{ fontSize: 11.5 }}>{stats.topics} 选题</span>
                         </>
                       )}
                     </div>

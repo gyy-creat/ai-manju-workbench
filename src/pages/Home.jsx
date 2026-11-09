@@ -181,7 +181,7 @@ export default function Home({ go }) {
             <Icon name="layers" size={13} /> 多剧本台账 · 每部独立隔离
           </div>
           <h1>剧本库</h1>
-          <p>一部漫剧一个剧本，从选题到成片全链路留痕；切换剧本即切换整套台账，互不串味。</p>
+          <p>一部漫剧一个剧本，从剧本到成片全链路留痕；切换剧本即切换整套台账，互不串味。</p>
         </div>
         <div className="hero-actions">
           <Btn variant="primary" icon="plus" onClick={() => setNewOpen(true)}>
@@ -320,7 +320,7 @@ export default function Home({ go }) {
           <Seg value={draft.style} onChange={(v) => setDraft({ ...draft, style: v })} options={styleOptions()} columns={2} />
         </Field>
         <div className="hint-block">
-          <Icon name="layers" size={13} /> 新剧本自带第 1 集 + 1 个空镜，角色、选题、资产都从零开始，不与其它剧本共享。
+          <Icon name="layers" size={13} /> 新剧本自带第 1 集 + 1 个空镜，角色、场景、资产都从零开始，不与其它剧本共享。
         </div>
       </Modal>
 

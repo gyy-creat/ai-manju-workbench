@@ -264,8 +264,8 @@ export default function Prompts({ notify }) {
             </Btn>
           ) : (
             <>
-              <Btn size="sm" onClick={() => runAi([shot])}>AI 定向 · 本镜</Btn>
-              <Btn size="sm" onClick={() => runAi(ep?.shots || [])}>AI 定向 · 本集</Btn>
+              <Btn size="sm" onClick={() => runAi([shot])} disabled={!aiReady}>AI 定向 · 本镜</Btn>
+              <Btn size="sm" onClick={() => runAi(ep?.shots || [])} disabled={!aiReady}>AI 定向 · 本集</Btn>
             </>
           )}
         </div>
@@ -275,6 +275,12 @@ export default function Prompts({ notify }) {
             <span>规则已换，上一套规则写的 AI 版不再显示（现在是模板版）</span>
             <Btn size="sm" disabled={busy} onClick={() => runAi([shot])}>按新规则重生成</Btn>
             <Btn size="sm" disabled={busy} onClick={() => runAi(ep?.shots || [])}>整集</Btn>
+          </div>
+        )}
+
+        {!aiReady && (
+          <div className="ai-gate">
+            未接入 AI：这一页的提示词只由模型定向生成。先在「设置 → AI 接入」填 baseUrl / 模型名 / key。
           </div>
         )}
 

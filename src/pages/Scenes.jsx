@@ -1,13 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useProject } from '../lib/store.jsx'
 import { SCENE_FIELDS, SCENE_TIMES, SCENE_WEATHERS, SCENE_TONES, styleOf } from '../lib/schema'
 import { describeScene, scenePromptLine } from '../lib/scenes.js'
 import { Btn, Field, Text, Area, Sel, Panel, Tag, Empty, Modal } from '../ui.jsx'
-
-const MODES = [
-  { value: 'auto', label: '自动（配了 key 就用模型，失败回落本地）' },
-  { value: 'local', label: '只走本地规则（不联网，秒出）' },
-]
 
 /** 每个字段的默认选项（AI 没给定制问句时用它，保证 open 里的每一项都能被点掉） */
 const OPTIONS = {
@@ -36,7 +31,7 @@ function sourceOf(ep) {
 export default function Scenes() {
   const { notify, project, actions } = useProject()
   const [epPick, setEpPick] = useState('all')
-  const [mode, setMode] = useState('auto')
+  const [aiReady, setAiReady] = useState(true)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [last, setLast] = useState(null) // { engine, ms, warning, asked }
@@ -96,6 +91,13 @@ export default function Scenes() {
     return rows
   }, [scenes, last, answered])
 
+  useEffect(() => {
+    fetch('/api/ai/config')
+      .then((r) => r.json())
+      .then((j) => setAiReady(Boolean(j?.config?.hasKey)))
+      .catch(() => {})
+  }, [])
+
   const derive = async () => {
     if (busy) return
     if (chars < 20) {
@@ -110,7 +112,6 @@ export default function Scenes() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text,
-          mode,
           styleName: st?.name || '',
           characters: project.characters.map((c) => c.name).filter(Boolean),
           existing: scenes.map((s) => ({ name: s.name })),
@@ -182,9 +183,6 @@ export default function Scenes() {
             <Field label="取自" hint="一整本还是只看某一集">
               <Sel value={epPick} onChange={setEpPick} options={epOptions} />
             </Field>
-            <Field label="生成方式">
-              <Sel value={mode} onChange={setMode} options={MODES} />
-            </Field>
           </div>
           <div className="gen-line">
             <span>
@@ -192,7 +190,12 @@ export default function Scenes() {
               {pending.length ? ` · ${pending.length} 项待确认` : ''}
             </span>
           </div>
-          <Btn variant="primary" icon="spark" onClick={derive} disabled={busy} style={{ width: '100%' }}>
+          {!aiReady && (
+            <div className="ai-gate">
+              未接入 AI：场景推测只由模型完成。先在「设置 → AI 接入」填 baseUrl / 模型名 / key。
+            </div>
+          )}
+          <Btn variant="primary" icon="spark" onClick={derive} disabled={busy || !aiReady} style={{ width: '100%' }}>
             {busy ? '推测中…（模型可能要十几秒）' : '从原文推测场景'}
           </Btn>
           {err && (
@@ -202,7 +205,7 @@ export default function Scenes() {
           )}
           {last && (
             <div className="dim" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.8 }}>
-              引擎 {last.engine === 'llm' ? '模型' : '本地规则'}
+              引擎 {last.engine === 'llm' ? '模型' : '模型（未标注）'}
               {last.ms ? ` · ${(last.ms / 1000).toFixed(1)}s` : ''}
               {last.warning ? ` · ${last.warning}` : ''}
               {last.asked?.length ? ` · 提了 ${last.asked.length} 个问题` : ''}
@@ -328,7 +331,7 @@ export default function Scenes() {
             <br />
             2. 05 / 06 页生成提示词时，场景的光线、色调、陈设会作为环境段拼进提示词。
             <br />
-            3. 本地规则只认词表（灵堂 / 卧室 / 办公室 …），模型会给更细的归纳；两者都会把没写清的字段抛成问题。
+            3. 模型会把没写清的字段抛成问题，点一下就能定下来，不猜。
           </div>
         </Panel>
       </div>

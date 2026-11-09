@@ -398,6 +398,38 @@ h4 {
   color: var(--ink-0);
 }
 
+/* 机检红点：挂在导航步骤上，有 error 就是实心红，只有提醒是空心黄 */
+.nav-alert {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: navAlert 2.2s ease-in-out infinite;
+}
+.nav-alert.err {
+  background: var(--err);
+  color: #fff6f1;
+  box-shadow: 0 0 0 0 rgba(224, 83, 58, 0.5);
+}
+.nav-alert.warn {
+  background: transparent;
+  border: 1px solid rgba(226, 177, 60, 0.6);
+  color: var(--warn);
+  animation: none;
+}
+.nav-item.active .nav-alert.err { animation: none; }
+@keyframes navAlert {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 83, 58, 0.45); }
+  50% { box-shadow: 0 0 0 4px rgba(224, 83, 58, 0); }
+}
+
 /* 导航：按流水线分组 */
 .nav-scroll {
   flex: 1;
@@ -3666,4 +3698,16 @@ button.cell-render img {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* AI 硬门槛提示条：没配 key 时分集/分镜/提示词都跑不了 */
+.ai-gate {
+  margin-bottom: 12px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  background: rgba(224, 83, 58, 0.07);
+  border: 1px solid rgba(224, 83, 58, 0.26);
+  color: var(--err);
+  font-size: 12px;
+  line-height: 1.75;
 }

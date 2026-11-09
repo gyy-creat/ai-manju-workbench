@@ -290,7 +290,8 @@ export function buildMarkdown(project, checks) {
   if (!c.issues.length) L.push(`| ok | — | — | 六项机检全通过 |`)
 
   L.push(``)
-  L.push(`## 六、剪辑与发布`)
+  L.push(`## 六、剪辑与发布（外部工序）`)
+  L.push(`- 剪辑不在工作台内完成：本包的 SRT、分镜 CSV、配音表直接导入剪映 / Premiere 即可`)
   L.push(`- 输出：${pf.width}×${pf.height} / ${pf.fps}fps / H.264 / 码率 8–12Mbps / AAC 192kbps`)
   L.push(`- 字幕：${pf.ratio} 竖屏，字号 ≥ 48px，距底 ≥ 220px（避开平台 UI）`)
   L.push(`- 平台备注：${pf.notes}`)

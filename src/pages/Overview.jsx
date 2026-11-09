@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { useProject } from '../lib/store.jsx'
-import { runChecks } from '../lib/checks'
-import { platform, styleOf, totalDur } from '../lib/schema'
+import { platform, styleOf } from '../lib/schema'
 import { Btn, Panel, Tag } from '../ui.jsx'
 import ChatPanel from '../components/ChatPanel.jsx'
 
@@ -9,7 +8,6 @@ export default function Overview({ go }) {
   const { project } = useProject()
   const pf = platform(project)
   const st = styleOf(project)
-  const checks = useMemo(() => runChecks(project), [project])
 
   const shots = project.episodes.flatMap((e) => e.shots)
   const withPrompt = shots.filter((s) => s.desc && s.size && s.chars).length
@@ -18,15 +16,12 @@ export default function Overview({ go }) {
   const assetsMissing = shots.filter((s) => !(project.assets || []).find((a) => a.ep === project.episodes.find((e) => e.shots.includes(s))?.no && a.shot === s.no)).length
 
   const steps = [
-    { id: 'topics', label: '选题', done: project.topics.length > 0, info: `${project.topics.length} 个选题` },
     { id: 'characters', label: '主要角色', done: project.characters.length > 0 && project.characters.every((c) => c.anchor), info: `${project.characters.filter((c) => c.anchor).length}/${project.characters.length} 已锚定` },
     { id: 'story', label: '剧本 / 分集', done: project.episodes.length > 0 && project.episodes.every((e) => e.hook), info: `${project.episodes.filter((e) => e.hook).length}/${project.episodes.length} 集有钩子` },
     { id: 'shots', label: '分镜脚本', done: shots.length > 0, info: `${withPrompt}/${shots.length} 镜可出图` },
     { id: 'prompts', label: '生图', done: shots.length > 0 && withPrompt === shots.length, info: `${withPrompt} 条可复制` },
-    { id: 'video', label: '生视频', done: shots.length > 0 && withVideo === shots.length, info: `${withVideo} 条可复制` },
     { id: 'voice', label: '配音 / 口型', done: voiced > 0, info: `${voiced} 条台词` },
-    { id: 'edit', label: '剪辑成片', done: totalDur(project) >= pf.episodeSec[0] * project.episodes.length * 0.5, info: `${totalDur(project).toFixed(0)}s 素材` },
-    { id: 'checks', label: '六项机检', done: checks.errors === 0, info: checks.errors ? `${checks.errors} 条要修` : '全通过' },
+    { id: 'video', label: '生视频', done: shots.length > 0 && withVideo === shots.length, info: `${withVideo} 条可复制` },
     { id: 'assets', label: '资产库', done: assetsMissing === 0, info: assetsMissing ? `待补 ${assetsMissing} 张关键帧` : '关键帧齐了' },
     { id: 'export', label: '导出交付', done: false, info: '9 件成品' },
   ]

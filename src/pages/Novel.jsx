@@ -1,14 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useProject } from '../lib/store.jsx'
 import { PLATFORMS, STYLES, cn } from '../lib/schema'
-import { splitEpisodes, splitManual } from '../lib/splitter.js'
 import SkillSelect from '../components/SkillSelect.jsx'
 import { Btn, Field, Area, Num, Sel, Text, Panel, Tag, Kv } from '../ui.jsx'
-
-const MODES = [
-  { value: 'auto', label: '自动（配了 key 就用模型，失败回落本地）' },
-  { value: 'local', label: '只走本地规则（不联网，秒出）' },
-]
 
 // 生成结果只在组件 state 里的话，切到 03/04 看一眼再回来就没了，
 // 用户会以为「白生成了」——所以按剧名存一份草稿，回来还能接着写。
@@ -28,13 +22,17 @@ export default function Novel({ go }) {
   const _stash = readStash(project.meta?.title)
   const [text, setText] = useState('')
   const [target, setTarget] = useState('new')
-  const [mode, setMode] = useState('auto')
+  const [aiReady, setAiReady] = useState(true)
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(_stash?.result || null)
   const [error, setError] = useState('')
+  useEffect(() => {
+    fetch('/api/ai/config')
+      .then((r) => r.json())
+      .then((j) => setAiReady(Boolean(j?.config?.hasKey)))
+      .catch(() => {})
+  }, [])
   const [segTarget, setSegTarget] = useState(1500)
-  const [splitMode, setSplitMode] = useState('auto')
-  const [marker, setMarker] = useState('---')
   const [segs, setSegs] = useState(_stash?.segs || null)
   const [segBusy, setSegBusy] = useState(false)
   const [segDone, setSegDone] = useState(0)
@@ -128,7 +126,6 @@ export default function Novel({ go }) {
       style: project.meta.style,
       episodes: 1,
       shotsPerEp: shots,
-      mode,
       skillIds: project.meta?.skillNovel || [],
       prev,
       platformName: pf.name,
@@ -155,7 +152,7 @@ export default function Novel({ go }) {
       const j = await r.json()
       if (!j.ok) throw new Error(j.error || '生成失败')
       setResult(j)
-      notify?.(`${j.engine === 'llm' ? '模型生成' : '本地规则'}：${j.stats.shots} 镜`)
+      adopt(j)
     } catch (e) {
       setError(String(e?.message || e))
     } finally {
@@ -163,35 +160,51 @@ export default function Novel({ go }) {
     }
   }
 
-  const adopt = () => {
-    const ep = result?.project?.episodes?.[0]
+  const adopt = (res = result) => {
+    const ep = res?.project?.episodes?.[0]
     if (!ep) return
     const replacing = target !== 'new'
     const oldNo = replacing ? project.episodes.find((e) => e.id === target)?.no : nextNo
-    if (replacing && !confirm(`覆盖第 ${oldNo} 集的全部镜头？现有 ${project.episodes.find((e) => e.id === target)?.shots?.length || 0} 镜会被替换。`)) return
     actions.importEpisode({ ...ep, text: ep.text || text }, { targetId: replacing ? target : '' })
     flushNow()
-    notify?.(replacing ? `第 ${oldNo} 集已替换` : `已写入第 ${nextNo} 集`)
+    notify?.(`${replacing ? `第 ${oldNo} 集已替换` : `已写入第 ${nextNo} 集`} · ${ep.shots?.length || 0} 镜`)
     go('shots')
   }
 
   /** 按爆点把整段正文切成多集（纯本地，秒出，不调模型） */
-  const doSplit = () => {
+  const doSplit = async () => {
     setError('')
-    const r = splitMode === 'auto'
-      ? splitEpisodes(text, { targetChars: segTarget })
-      : splitManual(text, { mode: splitMode, marker })
-    if (!r.episodes.length) {
-      setSegs(null)
-      setError(`正文太少（${r.stats.chars} 字），至少要 ${Math.round(segTarget * 0.5)} 字才够一集`)
+    if (chars < 300) {
+      setError(`正文太少（${chars} 字），至少 300 字再分集`)
       return
     }
-    setSegs(r)
-    setSegDone(0)
-    notify?.(`已切 ${r.stats.eps} 集 · 共 ${r.stats.chars} 字 · ${r.stats.boomCount} 处爆点`)
+    setSegBusy(true)
+    try {
+      const r = await fetch('/api/novel/split', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          targetChars: segTarget,
+          platformName: pf.name,
+          styleName: st.name,
+          episodeSec: `${pf.episodeSec[0]}–${pf.episodeSec[1]}`,
+        }),
+      })
+      const j = await r.json()
+      if (!j.ok) throw new Error(j.error || '分集失败')
+      setSegs({ episodes: j.segments, stats: j.stats })
+      setSegDone(0)
+      notify?.(`AI 已分 ${j.stats.eps} 集 · ${j.stats.chars} 字 · ${j.stats.boomCount} 处爆点`)
+    } catch (e) {
+      setSegs(null)
+      setError(String(e?.message || e))
+    } finally {
+      setSegBusy(false)
+    }
   }
 
-  /** 逐集生成镜头（串行；本地规则很快，模型慢但不会并发打爆接口） */
+  /** 逐集生成镜头（串行；模型慢，串着发免得并发打爆接口） */
   const genAll = async () => {
     if (!segs?.episodes?.length) return
     setSegBusy(true)
@@ -210,7 +223,6 @@ export default function Novel({ go }) {
             style: project.meta.style,
             episodes: 1,
             shotsPerEp: segShots(s),
-            mode,
             platformName: pf.name,
             styleName: st.name,
             episodeSec: `${pf.episodeSec[0]}–${pf.episodeSec[1]}`,
@@ -341,9 +353,6 @@ export default function Novel({ go }) {
     go('shots')
   }
 
-  const ep = result?.project?.episodes?.[0]
-  const epDur = ep ? ep.shots.reduce((m, s) => m + (Number(s.dur) || 0), 0) : 0
-
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(430px, 1fr))', gap: 14, alignItems: 'start' }}>
       <Panel
@@ -378,34 +387,23 @@ export default function Novel({ go }) {
       </Panel>
 
       <div>
+        {!aiReady && (
+          <div className="ai-gate">
+            未接入 AI：分集、分镜、提示词全部由模型生成。先在「设置 → AI 接入」填 baseUrl / 模型名 / key。
+          </div>
+        )}
         <Panel
-          title="分集（自动 / 手动）"
+          title="AI 分集"
           extra={segs ? <Tag level="accent">{segs.stats.eps} 集</Tag> : null}
         >
-          <div className="row">
-            <Field label="怎么切">
-              <Sel
-                value={splitMode}
-                onChange={setSplitMode}
-                options={[
-                  { value: 'auto', label: '自动 · 按字数 + 爆点' },
-                  { value: 'marker', label: '手动 · 按分隔行' },
-                  { value: 'heading', label: '手动 · 按章节标题' },
-                ]}
-              />
-            </Field>
-            {splitMode === 'auto' ? (
-              <Field label="每集目标字数">
-                <Num value={segTarget} onChange={setSegTarget} min={600} max={5000} step={100} />
-              </Field>
-            ) : splitMode === 'marker' ? (
-              <Field label="分隔符">
-                <Text value={marker} onChange={setMarker} placeholder="---" />
-              </Field>
-            ) : null}
+          <Field label="每集目标字数（给模型的范围，±40%）">
+            <Num value={segTarget} onChange={setSegTarget} min={600} max={5000} step={100} />
+          </Field>
+          <div style={{ fontSize: 11, color: 'var(--ink-4)', lineHeight: 1.8, margin: '2px 0 10px' }}>
+            模型只决定切点，每集正文逐字取自原文，不改写一个字。
           </div>
-          <Btn icon="scissors" onClick={doSplit} disabled={splitMode === 'auto' ? chars < 300 : chars < 40} style={{ width: '100%' }}>
-            {segs ? '重新分集' : splitMode === 'auto' ? '按爆点自动分集' : '按手动规则分集'}
+          <Btn icon="scissors" onClick={doSplit} disabled={segBusy || chars < 300 || !aiReady} style={{ width: '100%' }}>
+            {segBusy ? '模型正在分集…' : segs ? '重新分集' : '让 AI 按剧情分集'}
           </Btn>
 
           {segs && (
@@ -486,9 +484,6 @@ export default function Novel({ go }) {
                 <span>镜</span>
               </div>
             </Field>
-            <Field label="生成方式">
-              <Sel value={mode} onChange={setMode} options={MODES} />
-            </Field>
           </div>
           <div className="gen-line">
             <span>
@@ -501,18 +496,13 @@ export default function Novel({ go }) {
               onChange={(v) => actions.setMeta({ skillNovel: v })}
             />
           </div>
-          {mode === 'local' && (project.meta?.skillNovel || []).length > 0 && (
-            <div style={{ fontSize: 11, color: 'var(--warn)', lineHeight: 1.8, marginBottom: 10 }}>
-              当前是「只走本地规则」：本地规则链不读 skill 附录，这次挂的规则不会生效。要它起作用，把上面的生成方式切到「自动」（需先在设置里配好 key）。
-            </div>
-          )}
           {shotPlan.over && (
             <div style={{ fontSize: 11, color: 'var(--warn)', lineHeight: 1.8, marginBottom: 10 }}>
               这段 {chars} 字够 {Math.max(2, Math.round(chars / shotPlan.fitChars))} 集的量，单集只出到 {shotPlan.maxShots} 镜。
               先用右边「自动分集」切开，再用「按顺接续」一集一集写。
             </div>
           )}
-          <Btn variant="primary" icon="spark" onClick={generate} disabled={busy} style={{ width: '100%' }}>
+          <Btn variant="primary" icon="spark" onClick={generate} disabled={busy || !aiReady} style={{ width: '100%' }}>
             {busy ? '生成中…（模型可能要几十秒）' : '生成这一集的镜头'}
           </Btn>
           {error && (
@@ -522,64 +512,6 @@ export default function Novel({ go }) {
           )}
         </Panel>
 
-        <Panel title="本集结果" style={{ marginTop: 14 }}>
-          {!result ? (
-            <div className="dim" style={{ fontSize: 12, lineHeight: 1.9 }}>
-              还没有结果
-            </div>
-          ) : (
-            <>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-                <Tag level={result.engine === 'llm' ? 'accent' : 'warn'}>
-                  {result.engine === 'llm' ? '模型生成' : '本地规则'}
-                </Tag>
-                <Tag>{ep?.shots.length || 0} 镜</Tag>
-                <Tag>{epDur.toFixed(1)}s</Tag>
-                <Tag>{result.stats.chars} 字原文</Tag>
-                {(result.skillNames || []).length > 0 && (
-                  <Tag level="accent">规则 {(result.skillNames || []).length} 份</Tag>
-                )}
-                {result.ms ? <Tag>{(result.ms / 1000).toFixed(1)}s</Tag> : null}
-              </div>
-              {result.warning && (
-                <div className="dim" style={{ fontSize: 11, color: 'var(--warn)', lineHeight: 1.7, marginBottom: 8 }}>
-                  {result.warning}
-                </div>
-              )}
-              {result.hint && (
-                <div className="dim" style={{ fontSize: 11, color: 'var(--warn)', lineHeight: 1.7, marginBottom: 8 }}>
-                  {result.hint}
-                </div>
-              )}
-              <div className="kvs">
-                <Kv k="集标题" v={ep?.title || '—'} />
-                <Kv k="前 3 秒钩子" v={ep?.hook || '—'} />
-                <Kv k="本集角色" v={(result.project.characters || []).map((c) => `${c.name}（${c.role}）`).join('、') || '—'} />
-              </div>
-              <div style={{ display: 'grid', gap: 5, margin: '10px 0', maxHeight: 260, overflow: 'auto' }}>
-                {(ep?.shots || []).map((s) => (
-                  <div
-                    key={s.id}
-                    className="card"
-                    style={{ padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 8 }}
-                  >
-                    <b style={{ fontSize: 11.5, flexShrink: 0, width: 26 }}>{s.no}</b>
-                    <span className="dim" style={{ fontSize: 11, flexShrink: 0 }}>
-                      {s.size}·{s.angle}
-                    </span>
-                    <span style={{ fontSize: 11.5, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.dialogue ? `「${s.dialogue}」` : s.desc}
-                    </span>
-                    <span className="dim" style={{ fontSize: 10.5, flexShrink: 0 }}>{s.dur}s</span>
-                  </div>
-                ))}
-              </div>
-              <Btn variant="primary" icon="check" onClick={adopt} disabled={busy} style={{ width: '100%' }}>
-                {target === 'new' ? `新建第 ${nextNo} 集并写入` : `覆盖第 ${project.episodes.find((e) => e.id === target)?.no} 集`}
-              </Btn>
-            </>
-          )}
-        </Panel>
       </div>
     </div>
   )

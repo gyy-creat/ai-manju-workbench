@@ -14,6 +14,15 @@ const jaccard = (a, b) => {
   return inter / (a.size + b.size - inter)
 }
 
+export const RULE_PAGE = {
+  rate: 'voice',
+  density: 'shots',
+  suspense: 'story',
+  hook: 'story',
+  multi: 'shots',
+  emotion: 'shots',
+}
+
 export const RULES = [
   { id: 'rate', name: '对白语速', desc: '每镜台词字数 ÷ 时长，落在平台口播区间' },
   { id: 'density', name: '视觉变化密度', desc: '连续 3 镜景别/机位/场景全同 → 动态漫显呆' },

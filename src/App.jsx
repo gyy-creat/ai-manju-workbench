@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useProject } from './lib/store.jsx'
-import { runChecks } from './lib/checks'
+import { runChecks, RULE_PAGE } from './lib/checks'
 import { platform, styleOf, totalDur, totalShots } from './lib/schema'
 import { buildPackage, download } from './lib/exporters'
 import OnboardingBar from './components/OnboardingBar.jsx'
 import Home from './pages/Home.jsx'
 import Novel from './pages/Novel.jsx'
 import Overview from './pages/Overview.jsx'
-import Topics from './pages/Topics.jsx'
 import Story from './pages/Story.jsx'
 import Characters from './pages/Characters.jsx'
 import Scenes from './pages/Scenes.jsx'
@@ -15,8 +14,6 @@ import Shots from './pages/Shots.jsx'
 import Prompts from './pages/Prompts.jsx'
 import VideoPrompts from './pages/VideoPrompts.jsx'
 import Voice from './pages/Voice.jsx'
-import Edit from './pages/Edit.jsx'
-import Checks from './pages/Checks.jsx'
 import Assets from './pages/Assets.jsx'
 import Export from './pages/Export.jsx'
 import Settings from './pages/Settings.jsx'
@@ -31,28 +28,25 @@ const NAV = [
     items: [
       { id: 'novel', label: '导入本集文本', idx: '＋' },
       { id: 'overview', label: '总览', idx: '00' },
-      { id: 'topics', label: '选题', idx: '01' },
-      { id: 'story', label: '剧本 / 分集', idx: '02' },
-      { id: 'characters', label: '主要角色', idx: '03' },
-      { id: 'scenes', label: '场景环境', idx: '03b' },
-      { id: 'shots', label: '分镜脚本', idx: '04' },
+      { id: 'story', label: '剧本 / 分集', idx: '01' },
+      { id: 'characters', label: '主要角色', idx: '02' },
+      { id: 'scenes', label: '场景环境', idx: '02b' },
+      { id: 'shots', label: '分镜脚本', idx: '03' },
     ],
   },
   {
     group: '生产',
     items: [
-      { id: 'prompts', label: '生图', idx: '05' },
+      { id: 'prompts', label: '生图', idx: '04' },
+      { id: 'voice', label: '配音 / 口型', idx: '05' },
       { id: 'video', label: '生视频', idx: '06' },
-      { id: 'voice', label: '配音 / 口型', idx: '07' },
-      { id: 'edit', label: '剪辑成片', idx: '08' },
     ],
   },
   {
     group: '质检与交付',
     items: [
-      { id: 'checks', label: '六项机检', idx: '09' },
-      { id: 'assets', label: '资产库', idx: '10' },
-      { id: 'export', label: '导出交付', idx: '11' },
+      { id: 'assets', label: '资产库', idx: '07' },
+      { id: 'export', label: '导出交付', idx: '08' },
     ],
   },
   // 设置不进导航：入口固定在侧栏左下角（抽屉），完整设置页从抽屉里的按钮进
@@ -61,7 +55,6 @@ const NAV = [
 const PAGES = {
   overview: Overview,
   novel: Novel,
-  topics: Topics,
   story: Story,
   characters: Characters,
   scenes: Scenes,
@@ -69,8 +62,6 @@ const PAGES = {
   prompts: Prompts,
   video: VideoPrompts,
   voice: Voice,
-  edit: Edit,
-  checks: Checks,
   assets: Assets,
   export: Export,
   settings: Settings,
@@ -192,13 +183,17 @@ export default function App() {
   const pf = project ? platform(project) : null
   const st = project ? styleOf(project) : null
 
+  // 机检错误改成导航上的红点：哪一步有 error 就在那一步标出来，不再单开一页去查
+  const alertOf = (id) => {
+    if (!project || !checks) return null
+    const mine = checks.issues.filter((i) => (RULE_PAGE[i.rule] || 'shots') === id)
+    const e = mine.filter((i) => i.level === 'error').length
+    if (!e) return null
+    return { cls: 'err', n: e, tip: `${e} 条 error 待修` }
+  }
+
   const badgeFor = (id) => {
     if (!project) return null
-    if (id === 'checks') {
-      if (checks.errors) return { text: checks.errors, cls: 'err' }
-      if (checks.warns) return { text: checks.warns, cls: 'warn' }
-      return { text: '✓', cls: '' }
-    }
     if (id === 'story') return { text: project.episodes.length, cls: '' }
     if (id === 'shots') return { text: totalShots(project), cls: '' }
     if (id === 'characters') return { text: project.characters.length, cls: '' }
@@ -247,6 +242,7 @@ export default function App() {
                 <div className="lab">{g.group}</div>
                 {g.items.map((it) => {
                   const b = badgeFor(it.id)
+                  const a = alertOf(it.id)
                   return (
                     <button
                       type="button"
@@ -256,7 +252,7 @@ export default function App() {
                     >
                       <span className="idx">{it.id === 'overview' ? <Icon name="home" size={14} /> : it.idx}</span>
                       <span className="nav-label">{it.label}</span>
-                      {b && <span className={`badge ${b.cls}`}>{b.text}</span>}
+                      {a ? <span className={`nav-alert ${a.cls}`} title={a.tip}>{a.n}</span> : b && <span className={`badge ${b.cls}`}>{b.text}</span>}
                     </button>
                   )
                 })}

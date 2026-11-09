@@ -71,7 +71,7 @@ export default function Settings({ notify }) {
         <Kv k="形态" v="本地 Web 单页（Vite + React）" />
         <Kv k="启动" v="双击桌面「AI漫剧工作台」快捷方式 → 浏览器打开 127.0.0.1:5273" />
         <Kv k="API" v={apiOk ? '在线（/api/script 读写磁盘）' : '离线（仅浏览器缓存）'} />
-        <Kv k="接入模式" v="内部 AI 接口可选接入（/api/ai 代理），未配置 key 时全部走本地规则" />
+        <Kv k="接入模式" v="必须接入（/api/ai 本机代理）：分集、分镜、场景、提示词全部由模型生成，没 key 这些工序无法运行" />
         <Kv k="数据位置" v="data/library.json + data/scripts/ ｜ 导出 exports/" />
         <Kv k="隐私" v="除主动配置的模型端点外，全部本地" />
       </Panel>
